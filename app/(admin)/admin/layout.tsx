@@ -17,8 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="grid min-h-screen grid-cols-[240px_1fr] bg-background text-foreground">
       <aside className="flex flex-col gap-6 border-r border-border p-6">
-        <div className="text-h3 font-semibold tracking-tight">Better At Home</div>
-        <nav className="flex flex-col gap-1 text-sm">
+        <h2 className="text-h3 font-semibold tracking-tight">Better At Home</h2>
+        <nav aria-label="Primary" className="flex flex-col gap-1 text-sm">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -35,7 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Button>
         </form>
       </aside>
-      <main className="px-8 py-12">
+      <main className="px-4 py-6 md:px-8 md:py-12">
         <div className="mx-auto w-full max-w-[1200px]">{children}</div>
       </main>
     </div>
