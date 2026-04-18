@@ -17,6 +17,7 @@
 Files created/modified, grouped by responsibility. Each file has one clear purpose.
 
 **Tooling & config**
+
 - `.env.example` — documents every env var
 - `.prettierrc.json`, `.prettierignore`
 - `vitest.config.ts`, `vitest.setup.ts`
@@ -27,6 +28,7 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `package.json` — new scripts + deps
 
 **Supabase migrations** (one per logical change)
+
 - `supabase/migrations/0001_extensions.sql` — enable `pgcrypto`, `postgis`-free (we use simple numeric lat/lng for Phase 1)
 - `supabase/migrations/0002_admins.sql`
 - `supabase/migrations/0003_volunteers.sql`
@@ -40,6 +42,7 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `supabase/migrations/0011_helper_functions.sql` — `is_admin()` security-definer helper
 
 **Supabase clients + generated types**
+
 - `lib/supabase/client.ts` — browser client (anon key)
 - `lib/supabase/server.ts` — server component client (anon key + cookies)
 - `lib/supabase/admin.ts` — service-role client (server only)
@@ -48,6 +51,7 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `middleware.ts` — Next middleware calling the helper
 
 **Auth**
+
 - `lib/auth/roles.ts` — `getUser`, `getUserRole`, `requireAdmin`, `requireActiveVolunteer`
 - `app/(public)/login/page.tsx`
 - `app/(public)/login/actions.ts`
@@ -59,12 +63,14 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `app/(public)/logout/route.ts`
 
 **Role-gated shells**
+
 - `app/(admin)/admin/layout.tsx` — admin guard + placeholder shell
 - `app/(admin)/admin/page.tsx` — placeholder dashboard
 - `app/(volunteer)/volunteer/layout.tsx` — volunteer guard + placeholder shell
 - `app/(volunteer)/volunteer/dashboard/page.tsx` — placeholder
 
 **External service clients**
+
 - `lib/notifications/index.ts` — `NotificationService` interface + `Email` type
 - `lib/notifications/email-resend.ts` — Resend implementation
 - `lib/notifications/email-console.ts` — console implementation for dev/tests
@@ -72,12 +78,14 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `lib/mapbox/geocode.ts` — server-side geocoding
 
 **DB query helpers (skeletons)**
+
 - `lib/db/queries/admins.ts`
 - `lib/db/queries/volunteers.ts`
 - `lib/db/queries/seniors.ts`
 - `lib/db/queries/service-requests.ts`
 
 **Tests**
+
 - `lib/notifications/email-console.test.ts`
 - `lib/notifications/factory.test.ts`
 - `lib/mapbox/geocode.test.ts`
@@ -89,6 +97,7 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 - `tests/e2e/auth.spec.ts` — signup → approve → login golden path
 
 **Modified**
+
 - `app/layout.tsx` — set real title/description
 - `package.json` — dependencies + scripts
 - `.gitignore` — already covers `.env*`, add `/supabase/.branches`, `/supabase/.temp`
@@ -98,6 +107,7 @@ Files created/modified, grouped by responsibility. Each file has one clear purpo
 ## Task 1: Install tooling (Prettier, Vitest, Playwright) and baseline config
 
 **Files:**
+
 - Create: `.prettierrc.json`, `.prettierignore`
 - Create: `vitest.config.ts`, `vitest.setup.ts`
 - Create: `playwright.config.ts`
@@ -249,6 +259,7 @@ git commit -m "chore: add Prettier, Vitest, Playwright tooling"
 ## Task 2: Install Supabase CLI and initialize local project
 
 **Files:**
+
 - Create: `supabase/config.toml` (generated)
 - Create: `supabase/seed.sql`
 - Modify: `.gitignore`
@@ -330,6 +341,7 @@ git commit -m "chore: initialize Supabase local dev"
 ## Task 3: Create `.env.example` and local `.env.local`
 
 **Files:**
+
 - Create: `.env.example`
 - Create: `.env.local` (NOT committed)
 
@@ -380,6 +392,7 @@ git commit -m "chore: document env vars in .env.example"
 ## Task 4: Migration 0001 — extensions
 
 **Files:**
+
 - Create: `supabase/migrations/0001_extensions.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -410,6 +423,7 @@ git commit -m "feat(db): enable pgcrypto extension"
 ## Task 5: Migration 0002 — `admins` table
 
 **Files:**
+
 - Create: `supabase/migrations/0002_admins.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -448,6 +462,7 @@ git commit -m "feat(db): add admins table"
 ## Task 6: Migration 0003 — `volunteers` table
 
 **Files:**
+
 - Create: `supabase/migrations/0003_volunteers.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -500,6 +515,7 @@ git commit -m "feat(db): add volunteers table"
 ## Task 7: Migration 0004 — `seniors` table
 
 **Files:**
+
 - Create: `supabase/migrations/0004_seniors.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -548,6 +564,7 @@ git commit -m "feat(db): add seniors table"
 ## Task 8: Migration 0005 — `service_requests` table
 
 **Files:**
+
 - Create: `supabase/migrations/0005_service_requests.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -598,6 +615,7 @@ git commit -m "feat(db): add service_requests table"
 ## Task 9: Migration 0006 — `notifications` table
 
 **Files:**
+
 - Create: `supabase/migrations/0006_notifications.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -642,6 +660,7 @@ git commit -m "feat(db): add notifications table"
 ## Task 10: Migration 0007 — `response_tokens` table
 
 **Files:**
+
 - Create: `supabase/migrations/0007_response_tokens.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -685,6 +704,7 @@ git commit -m "feat(db): add response_tokens table"
 ## Task 11: Migration 0008 — `service_sessions` table (Phase 2 placeholder)
 
 **Files:**
+
 - Create: `supabase/migrations/0008_service_sessions.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -733,6 +753,7 @@ git commit -m "feat(db): add service_sessions table (phase 2 placeholder)"
 ## Task 12: Migration 0009 — triggers
 
 **Files:**
+
 - Create: `supabase/migrations/0009_triggers.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -821,6 +842,7 @@ git commit -m "feat(db): add updated_at, approved_at, and token supersede trigge
 ## Task 13: Migration 0010 — helper function `is_admin()`
 
 **Files:**
+
 - Create: `supabase/migrations/0011_helper_functions.sql`
 
 (Note: numbered 0011 but created before 0010 RLS because RLS depends on this.)
@@ -828,6 +850,7 @@ git commit -m "feat(db): add updated_at, approved_at, and token supersede trigge
 Actually the migration files run in lexicographic order, so rename appropriately. Create:
 
 **Files:**
+
 - Create: `supabase/migrations/0010_helper_functions.sql`
 - Defer RLS policies migration to `0011_rls_policies.sql`
 
@@ -870,6 +893,7 @@ git commit -m "feat(db): add is_admin() helper function"
 ## Task 14: Migration 0011 — RLS policies
 
 **Files:**
+
 - Create: `supabase/migrations/0011_rls_policies.sql`
 
 - [ ] **Step 1: Create the migration**
@@ -1007,6 +1031,7 @@ git commit -m "feat(db): add RLS policies for all tables"
 ## Task 15: Generate Supabase TypeScript types
 
 **Files:**
+
 - Create: `lib/db/types.ts`
 
 - [ ] **Step 1: Ensure Supabase is running**
@@ -1046,6 +1071,7 @@ git commit -m "feat(db): generate Supabase TypeScript types"
 ## Task 16: Install Supabase SSR client libraries
 
 **Files:**
+
 - Modify: `package.json`
 
 - [ ] **Step 1: Install runtime deps**
@@ -1074,6 +1100,7 @@ git commit -m "chore: add Supabase SSR client deps"
 ## Task 17: Create Supabase client modules
 
 **Files:**
+
 - Create: `lib/supabase/client.ts`
 - Create: `lib/supabase/server.ts`
 - Create: `lib/supabase/admin.ts`
@@ -1214,6 +1241,7 @@ git commit -m "feat(auth): add Supabase browser, server, admin clients and sessi
 ## Task 18: Add `tsconfig` path alias `@/*`
 
 **Files:**
+
 - Modify: `tsconfig.json`
 
 - [ ] **Step 1: Read current `tsconfig.json`**
@@ -1254,6 +1282,7 @@ Skip commit if tsconfig was already correct.
 ## Task 19: Role guards (`lib/auth/roles.ts`) with unit tests
 
 **Files:**
+
 - Create: `lib/auth/roles.ts`
 - Create: `lib/auth/roles.test.ts`
 
@@ -1274,7 +1303,11 @@ type MockClient = {
   from: ReturnType<typeof vi.fn>;
 };
 
-function mockClient(user: { id: string } | null, adminRow: unknown, volunteerRow: unknown): MockClient {
+function mockClient(
+  user: { id: string } | null,
+  adminRow: unknown,
+  volunteerRow: unknown,
+): MockClient {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }) },
     from: vi.fn((table: string) => ({
@@ -1428,6 +1461,7 @@ git commit -m "feat(auth): add role helpers with unit tests"
 ## Task 20: `NotificationService` interface and console/factory implementations with tests
 
 **Files:**
+
 - Create: `lib/notifications/index.ts`
 - Create: `lib/notifications/email-console.ts`
 - Create: `lib/notifications/email-console.test.ts`
@@ -1444,9 +1478,7 @@ export type Email = {
   text?: string;
 };
 
-export type SendResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string };
+export type SendResult = { ok: true; id: string } | { ok: false; error: string };
 
 export interface NotificationService {
   sendEmail(email: Email): Promise<SendResult>;
@@ -1601,6 +1633,7 @@ git commit -m "feat(notifications): add NotificationService interface with conso
 ## Task 21: Resend email implementation
 
 **Files:**
+
 - Modify: `lib/notifications/email-resend.ts`
 - Create: `lib/notifications/email-resend.test.ts`
 - Modify: `package.json`
@@ -1707,6 +1740,7 @@ git commit -m "feat(notifications): implement Resend email driver"
 ## Task 22: Mapbox geocoding module
 
 **Files:**
+
 - Create: `lib/mapbox/geocode.ts`
 - Create: `lib/mapbox/geocode.test.ts`
 
@@ -1789,7 +1823,9 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   const res = await fetch(url);
   if (!res.ok) return { ok: false, error: `http_${res.status}` as const };
 
-  const body = (await res.json()) as { features?: Array<{ center?: [number, number]; place_name?: string }> };
+  const body = (await res.json()) as {
+    features?: Array<{ center?: [number, number]; place_name?: string }>;
+  };
   const feature = body.features?.[0];
   if (!feature) return { ok: false, error: "not_found" };
   if (!feature.center || feature.center.length !== 2 || !feature.place_name) {
@@ -1820,6 +1856,7 @@ git commit -m "feat(mapbox): add server-side geocoding with tests"
 ## Task 23: DB query helper skeletons
 
 **Files:**
+
 - Create: `lib/db/queries/admins.ts`
 - Create: `lib/db/queries/volunteers.ts`
 - Create: `lib/db/queries/seniors.ts`
@@ -1836,11 +1873,7 @@ import type { Database } from "@/lib/db/types";
 type Client = SupabaseClient<Database>;
 
 export async function getAdminById(supabase: Client, id: string) {
-  const { data, error } = await supabase
-    .from("admins")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await supabase.from("admins").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -1855,11 +1888,7 @@ import type { Database } from "@/lib/db/types";
 type Client = SupabaseClient<Database>;
 
 export async function getVolunteerById(supabase: Client, id: string) {
-  const { data, error } = await supabase
-    .from("volunteers")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await supabase.from("volunteers").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -1900,10 +1929,7 @@ type Client = SupabaseClient<Database>;
 
 // Populated in the Senior Management sub-project.
 export async function listSeniors(supabase: Client) {
-  const { data, error } = await supabase
-    .from("seniors")
-    .select("*")
-    .order("last_name");
+  const { data, error } = await supabase.from("seniors").select("*").order("last_name");
   if (error) throw error;
   return data;
 }
@@ -1948,6 +1974,7 @@ git commit -m "feat(db): add typed query helper skeletons"
 ## Task 24: Install shadcn/ui primitives we need for auth pages
 
 **Files:**
+
 - Create: shadcn components at `components/ui/*`
 - Modify: `package.json`, `components.json`
 
@@ -1958,6 +1985,7 @@ npx shadcn@latest init
 ```
 
 When prompted:
+
 - Style: Default
 - Base color: Slate (or your preference)
 - CSS variables: Yes
@@ -1990,6 +2018,7 @@ git commit -m "chore: add shadcn/ui and base primitives"
 ## Task 25: Login page + server action (email/password)
 
 **Files:**
+
 - Create: `app/(public)/login/page.tsx`
 - Create: `app/(public)/login/actions.ts`
 
@@ -2075,8 +2104,11 @@ export default function LoginPage() {
               Continue with Google
             </Button>
           </form>
-          <p className="mt-4 text-sm text-center">
-            New here? <a href="/signup" className="underline">Sign up</a>
+          <p className="mt-4 text-center text-sm">
+            New here?{" "}
+            <a href="/signup" className="underline">
+              Sign up
+            </a>
           </p>
         </CardContent>
       </Card>
@@ -2106,6 +2138,7 @@ git commit -m "feat(auth): add login page with email/password and Google actions
 ## Task 26: Signup page (email/password) + server action
 
 **Files:**
+
 - Create: `app/(public)/signup/page.tsx`
 - Create: `app/(public)/signup/actions.ts`
 
@@ -2152,7 +2185,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SignupPage() {
-  const [state, formAction, pending] = useActionState<SignupState, FormData>(signupAction, undefined);
+  const [state, formAction, pending] = useActionState<SignupState, FormData>(
+    signupAction,
+    undefined,
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -2182,8 +2218,11 @@ export default function SignupPage() {
               {pending ? "Creating account..." : "Create account"}
             </Button>
           </form>
-          <p className="mt-4 text-sm text-center">
-            Already have an account? <a href="/login" className="underline">Log in</a>
+          <p className="mt-4 text-center text-sm">
+            Already have an account?{" "}
+            <a href="/login" className="underline">
+              Log in
+            </a>
           </p>
         </CardContent>
       </Card>
@@ -2212,6 +2251,7 @@ git commit -m "feat(auth): add volunteer signup page with email/password"
 ## Task 27: OAuth callback route + complete-profile page
 
 **Files:**
+
 - Create: `app/(public)/auth/callback/route.ts`
 - Create: `app/(public)/signup/complete-profile/page.tsx`
 - Create: `app/(public)/signup/complete-profile/actions.ts`
@@ -2395,6 +2435,7 @@ git commit -m "feat(auth): add OAuth callback and complete-profile page"
 ## Task 28: Role-gated layouts and placeholder pages
 
 **Files:**
+
 - Create: `app/(admin)/admin/layout.tsx`
 - Create: `app/(admin)/admin/page.tsx`
 - Create: `app/(volunteer)/volunteer/layout.tsx`
@@ -2410,17 +2451,31 @@ import Link from "next/link";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   return (
-    <div className="min-h-screen grid grid-cols-[220px_1fr]">
-      <nav className="border-r p-4 space-y-2">
+    <div className="grid min-h-screen grid-cols-[220px_1fr]">
+      <nav className="space-y-2 border-r p-4">
         <h1 className="font-semibold">Admin</h1>
         <ul className="space-y-1 text-sm">
-          <li><Link href="/admin">Dashboard</Link></li>
-          <li><Link href="/admin/volunteers">Volunteers</Link></li>
-          <li><Link href="/admin/seniors">Seniors</Link></li>
-          <li><Link href="/admin/requests">Requests</Link></li>
-          <li><Link href="/admin/calendar">Calendar</Link></li>
-          <li><Link href="/admin/map">Map</Link></li>
-          <li><Link href="/admin/analytics">Analytics</Link></li>
+          <li>
+            <Link href="/admin">Dashboard</Link>
+          </li>
+          <li>
+            <Link href="/admin/volunteers">Volunteers</Link>
+          </li>
+          <li>
+            <Link href="/admin/seniors">Seniors</Link>
+          </li>
+          <li>
+            <Link href="/admin/requests">Requests</Link>
+          </li>
+          <li>
+            <Link href="/admin/calendar">Calendar</Link>
+          </li>
+          <li>
+            <Link href="/admin/map">Map</Link>
+          </li>
+          <li>
+            <Link href="/admin/analytics">Analytics</Link>
+          </li>
         </ul>
         <form action="/logout" method="post" className="pt-4">
           <button className="text-sm underline">Log out</button>
@@ -2439,7 +2494,7 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h2 className="text-xl font-semibold">Dashboard</h2>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Phase 1 feature sub-projects will fill this in.
       </p>
     </div>
@@ -2462,13 +2517,19 @@ export default async function VolunteerLayout({ children }: { children: React.Re
   // role.role === "volunteer" — allow all statuses in; the page decides banner vs content.
 
   return (
-    <div className="min-h-screen grid grid-cols-[220px_1fr]">
-      <nav className="border-r p-4 space-y-2">
+    <div className="grid min-h-screen grid-cols-[220px_1fr]">
+      <nav className="space-y-2 border-r p-4">
         <h1 className="font-semibold">Volunteer</h1>
         <ul className="space-y-1 text-sm">
-          <li><Link href="/volunteer/dashboard">Dashboard</Link></li>
-          <li><Link href="/volunteer/history">History</Link></li>
-          <li><Link href="/volunteer/profile">Profile</Link></li>
+          <li>
+            <Link href="/volunteer/dashboard">Dashboard</Link>
+          </li>
+          <li>
+            <Link href="/volunteer/history">History</Link>
+          </li>
+          <li>
+            <Link href="/volunteer/profile">Profile</Link>
+          </li>
         </ul>
         <form action="/logout" method="post" className="pt-4">
           <button className="text-sm underline">Log out</button>
@@ -2503,7 +2564,7 @@ export default async function VolunteerDashboardPage() {
         </div>
       ) : null}
       {status === "active" ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No pending invites. Feature sub-projects will light this up.
         </p>
       ) : null}
@@ -2545,6 +2606,7 @@ git commit -m "feat(auth): add role-gated admin and volunteer shells with logout
 ## Task 29: Root layout polish and home redirect
 
 **Files:**
+
 - Modify: `app/layout.tsx`
 - Modify: `app/page.tsx`
 
@@ -2601,6 +2663,7 @@ git commit -m "feat: set real app metadata and role-based home redirect"
 ## Task 30: Integration test infrastructure
 
 **Files:**
+
 - Create: `tests/integration/setup.ts`
 - Create: `tests/integration/helpers.ts`
 - Create: `vitest.integration.config.ts`
@@ -2770,6 +2833,7 @@ git commit -m "chore(test): add integration test infrastructure"
 ## Task 31: RLS integration tests — volunteers
 
 **Files:**
+
 - Create: `tests/integration/rls-volunteers.test.ts`
 
 - [ ] **Step 1: Write the tests**
@@ -2796,10 +2860,7 @@ describe("RLS: volunteers", () => {
 
   it("volunteer cannot read another volunteer's row", async () => {
     const client = await signIn(volunteerA.email);
-    const { data } = await client
-      .from("volunteers")
-      .select("*")
-      .eq("id", volunteerB.userId);
+    const { data } = await client.from("volunteers").select("*").eq("id", volunteerB.userId);
     expect(data).toEqual([]);
   });
 
@@ -2892,6 +2953,7 @@ git commit -m "test(rls): verify volunteers RLS policies"
 ## Task 32: RLS integration tests — seniors (admin access)
 
 **Files:**
+
 - Create: `tests/integration/rls-seniors.test.ts`
 
 - [ ] **Step 1: Write the tests**
@@ -2964,6 +3026,7 @@ git commit -m "test(rls): verify seniors admin-only access"
 ## Task 33: RLS integration tests — service_requests visibility
 
 **Files:**
+
 - Create: `tests/integration/rls-requests.test.ts`
 
 - [ ] **Step 1: Write the tests**
@@ -3058,6 +3121,7 @@ git commit -m "test(rls): verify service_requests volunteer visibility"
 ## Task 34: Trigger integration tests
 
 **Files:**
+
 - Create: `tests/integration/triggers.test.ts`
 
 - [ ] **Step 1: Write the tests**
@@ -3188,6 +3252,7 @@ git commit -m "test(db): verify updated_at, approved_at, and supersede triggers"
 ## Task 35: Seed a dev admin user
 
 **Files:**
+
 - Modify: `supabase/seed.sql`
 - Create: `scripts/seed-dev-admin.ts`
 - Modify: `package.json`
@@ -3277,6 +3342,7 @@ git commit -m "chore: add dev admin seeding script"
 ## Task 36: E2E test — signup to approval to login
 
 **Files:**
+
 - Replace: `tests/e2e/smoke.spec.ts`
 - Create: `tests/e2e/auth.spec.ts`
 
@@ -3369,6 +3435,7 @@ git commit -m "test(e2e): signup to approval to login golden path"
 ## Task 37: GitHub Actions CI
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Create the workflow**
@@ -3439,11 +3506,12 @@ git commit -m "ci: run lint, typecheck, unit, and integration on PR"
 ## Task 38: Documentation — README, local dev, and ops
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Replace `README.md` contents**
 
-```markdown
+````markdown
 # Better At Home Scheduling
 
 Web platform for matching senior service requests with volunteers.
@@ -3463,11 +3531,14 @@ See [CLAUDE.md](./CLAUDE.md) and [docs/superpowers/specs/2026-04-18-phase-1-desi
    ```bash
    npm run supabase:start
    ```
-   Copy the printed `anon` and `service_role` keys into `.env.local`.
-3. Install deps:
-   ```bash
-   npm install
-   ```
+````
+
+Copy the printed `anon` and `service_role` keys into `.env.local`. 3. Install deps:
+
+```bash
+npm install
+```
+
 4. Generate types:
    ```bash
    npm run supabase:types
@@ -3484,19 +3555,19 @@ See [CLAUDE.md](./CLAUDE.md) and [docs/superpowers/specs/2026-04-18-phase-1-desi
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Next dev server |
-| `npm run build` | Production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript |
-| `npm run format` | Prettier write |
-| `npm run test` | Vitest unit tests |
-| `npm run test:integration` | Vitest integration tests (needs local Supabase) |
-| `npm run test:e2e` | Playwright E2E |
-| `npm run supabase:start` / `:stop` / `:reset` | Local Supabase |
-| `npm run supabase:types` | Regenerate TS types from local DB |
-| `npm run seed:admin` | Create dev admin user |
+| Command                                       | Purpose                                         |
+| --------------------------------------------- | ----------------------------------------------- |
+| `npm run dev`                                 | Next dev server                                 |
+| `npm run build`                               | Production build                                |
+| `npm run lint`                                | ESLint                                          |
+| `npm run typecheck`                           | TypeScript                                      |
+| `npm run format`                              | Prettier write                                  |
+| `npm run test`                                | Vitest unit tests                               |
+| `npm run test:integration`                    | Vitest integration tests (needs local Supabase) |
+| `npm run test:e2e`                            | Playwright E2E                                  |
+| `npm run supabase:start` / `:stop` / `:reset` | Local Supabase                                  |
+| `npm run supabase:types`                      | Regenerate TS types from local DB               |
+| `npm run seed:admin`                          | Create dev admin user                           |
 
 ## Directory guide
 
@@ -3510,14 +3581,15 @@ See [CLAUDE.md](./CLAUDE.md) and [docs/superpowers/specs/2026-04-18-phase-1-desi
 ## Production deployment
 
 Covered in the Phase 1 design doc. Short version: Vercel + Supabase production project + verified Resend domain + Mapbox tokens restricted to the Vercel domain.
-```
+
+````
 
 - [ ] **Step 2: Commit**
 
 ```bash
 git add README.md
 git commit -m "docs: project README with setup, commands, and layout"
-```
+````
 
 ---
 
@@ -3566,6 +3638,7 @@ npm run dev
 ```
 
 Manually:
+
 - Visit `/` → redirects to `/login`.
 - Log in as `admin@local.test` / `password123!` → lands on `/admin`.
 - Open a new private window, go to `/signup`, create a volunteer, complete profile → sees "awaiting approval".
