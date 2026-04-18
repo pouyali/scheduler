@@ -1,12 +1,25 @@
+import { Resend } from "resend";
 import type { Email, NotificationService, SendResult } from "./index";
 
 export class ResendEmailService implements NotificationService {
-  constructor(
-    private readonly apiKey: string,
-    private readonly from: string,
-  ) {}
+  private readonly client: Resend;
 
-  async sendEmail(_email: Email): Promise<SendResult> {
-    return { ok: false, error: "Resend impl pending (Task 21)" };
+  constructor(
+    apiKey: string,
+    private readonly from: string,
+  ) {
+    this.client = new Resend(apiKey);
+  }
+
+  async sendEmail(email: Email): Promise<SendResult> {
+    const { data, error } = await this.client.emails.send({
+      from: this.from,
+      to: email.to,
+      subject: email.subject,
+      html: email.html,
+      text: email.text,
+    });
+    if (error || !data) return { ok: false, error: error?.message ?? "unknown Resend error" };
+    return { ok: true, id: data.id };
   }
 }
