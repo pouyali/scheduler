@@ -12,7 +12,11 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:types": "supabase gen types typescript --local > lib/db/types.ts"
   },
   "dependencies": {
     "next": "16.2.4",
@@ -34,6 +38,7 @@
     "jsdom": "^29.0.2",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "supabase": "^2.92.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.4"
