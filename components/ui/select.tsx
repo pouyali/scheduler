@@ -17,7 +17,7 @@ export const SelectTrigger = React.forwardRef<
     data-slot="select-trigger"
     className={cn(
       "flex h-9 w-full items-center justify-between rounded-[var(--radius)] border border-border bg-background px-3 py-2 text-sm text-foreground transition-shadow outline-none",
-      "focus:shadow-[var(--shadow-focus)]",
+      "focus-visible:shadow-[var(--shadow-focus)]",
       "disabled:pointer-events-none disabled:opacity-50",
       className,
     )}
