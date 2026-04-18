@@ -1,40 +1,43 @@
 import { requireAdmin } from "@/lib/auth/roles";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+const NAV = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/volunteers", label: "Volunteers" },
+  { href: "/admin/seniors", label: "Seniors" },
+  { href: "/admin/requests", label: "Requests" },
+  { href: "/admin/calendar", label: "Calendar" },
+  { href: "/admin/map", label: "Map" },
+  { href: "/admin/analytics", label: "Analytics" },
+];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   return (
-    <div className="grid min-h-screen grid-cols-[220px_1fr]">
-      <nav className="space-y-2 border-r p-4">
-        <h1 className="font-semibold">Admin</h1>
-        <ul className="space-y-1 text-sm">
-          <li>
-            <Link href="/admin">Dashboard</Link>
-          </li>
-          <li>
-            <Link href="/admin/volunteers">Volunteers</Link>
-          </li>
-          <li>
-            <Link href="/admin/seniors">Seniors</Link>
-          </li>
-          <li>
-            <Link href="/admin/requests">Requests</Link>
-          </li>
-          <li>
-            <Link href="/admin/calendar">Calendar</Link>
-          </li>
-          <li>
-            <Link href="/admin/map">Map</Link>
-          </li>
-          <li>
-            <Link href="/admin/analytics">Analytics</Link>
-          </li>
-        </ul>
-        <form action="/logout" method="post" className="pt-4">
-          <button className="text-sm underline">Log out</button>
+    <div className="grid min-h-screen grid-cols-[240px_1fr] bg-background text-foreground">
+      <aside className="flex flex-col gap-6 border-r border-border p-6">
+        <div className="text-h3 font-semibold tracking-tight">Better At Home</div>
+        <nav className="flex flex-col gap-1 text-sm">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-[var(--radius)] px-3 py-2 text-foreground transition-colors hover:bg-muted"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <form action="/logout" method="post" className="mt-auto">
+          <Button type="submit" variant="ghost" size="sm" className="w-full justify-start">
+            Log out
+          </Button>
         </form>
-      </nav>
-      <main className="p-6">{children}</main>
+      </aside>
+      <main className="px-8 py-12">
+        <div className="mx-auto w-full max-w-[1200px]">{children}</div>
+      </main>
     </div>
   );
 }
