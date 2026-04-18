@@ -164,6 +164,7 @@ export type Database = {
         Row: {
           address_line1: string
           address_line2: string | null
+          archived_at: string | null
           city: string
           created_at: string
           created_by: string | null
@@ -182,6 +183,7 @@ export type Database = {
         Insert: {
           address_line1: string
           address_line2?: string | null
+          archived_at?: string | null
           city: string
           created_at?: string
           created_by?: string | null
@@ -200,6 +202,7 @@ export type Database = {
         Update: {
           address_line1?: string
           address_line2?: string | null
+          archived_at?: string | null
           city?: string
           created_at?: string
           created_by?: string | null
@@ -431,6 +434,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_senior_cascade: {
+        Args: { p_senior_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
