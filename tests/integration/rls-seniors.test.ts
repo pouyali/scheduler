@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { createAdminUser, createVolunteerUser, signIn } from "./helpers";
+import { adminClient, createAdminUser, createVolunteerUser, signIn } from "./helpers";
 
 describe("RLS: seniors", () => {
   let admin: { userId: string; email: string };
@@ -41,5 +41,43 @@ describe("RLS: seniors", () => {
       postal_code: "M1M 1M1",
     });
     expect(error).not.toBeNull();
+  });
+
+  it("volunteer cannot read any senior — archived or not", async () => {
+    const sb = adminClient();
+    const { data: active } = await sb
+      .from("seniors")
+      .insert({
+        first_name: "Active",
+        last_name: "Senior",
+        phone: "555-0001",
+        address_line1: "1",
+        city: "C",
+        province: "ON",
+        postal_code: "M1M 1M1",
+      })
+      .select()
+      .single();
+    const { data: archived } = await sb
+      .from("seniors")
+      .insert({
+        first_name: "Archived",
+        last_name: "Senior",
+        phone: "555-0002",
+        address_line1: "2",
+        city: "C",
+        province: "ON",
+        postal_code: "M1M 1M1",
+        archived_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    const client = await signIn(volunteer.email);
+    const { data: rows } = await client
+      .from("seniors")
+      .select("id")
+      .in("id", [active!.id, archived!.id]);
+    expect(rows ?? []).toHaveLength(0);
   });
 });
