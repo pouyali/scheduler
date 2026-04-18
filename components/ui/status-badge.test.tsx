@@ -17,4 +17,8 @@ describe("StatusBadge", () => {
     const { container } = render(<StatusBadge variant="archived">Archived</StatusBadge>);
     expect(container.firstChild).toHaveClass("border");
   });
+  it("applies the active variant class", () => {
+    const { container } = render(<StatusBadge variant="active">Active</StatusBadge>);
+    expect(container.firstChild).toHaveClass("bg-muted");
+  });
 });

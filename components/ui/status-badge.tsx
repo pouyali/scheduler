@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 
 const VARIANTS = {
   archived: "border border-border text-foreground/40",
-  "not-geocoded": "bg-[rgba(28,28,28,0.04)] text-[rgba(28,28,28,0.82)] italic",
-  active: "bg-[rgba(28,28,28,0.04)] text-foreground",
+  "not-geocoded": "bg-muted text-foreground/80 italic",
+  active: "bg-muted text-foreground",
 } as const;
 
 type Variant = keyof typeof VARIANTS;
