@@ -34,7 +34,8 @@ describe("CSV import preview logic", () => {
     const results = await Promise.all(
       parsed.map(async (r) => {
         if (r.errors.length > 0) return { ...r, geocode: null as { lat: number; lng: number } | null };
-        const full = `${r.data.address_line1}, ${r.data.city}, ${r.data.province}, ${r.data.postal_code}, Canada`;
+        // r.data is non-null when errors is empty (discriminated union in ParsedRow)
+        const full = `${r.data!.address_line1}, ${r.data!.city}, ${r.data!.province}, ${r.data!.postal_code}, Canada`;
         const geo = await geocodeAddress(full);
         return {
           ...r,
