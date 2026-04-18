@@ -7,3 +7,4 @@ build
 package-lock.json
 supabase/.branches
 supabase/.temp
+lib/db/types.ts
