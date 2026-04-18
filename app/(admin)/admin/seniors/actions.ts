@@ -39,6 +39,7 @@ export async function createSenior(formData: FormData) {
   });
 
   revalidatePath("/admin/seniors");
+  revalidatePath("/admin/map");
   redirect(`/admin/seniors/${row.id}`);
 }
 
@@ -60,6 +61,7 @@ export async function updateSenior(id: string, formData: FormData) {
   await updateSeniorRow(supabase, id, { ...rest, lat, lng });
 
   revalidatePath("/admin/seniors");
+  revalidatePath("/admin/map");
   revalidatePath(`/admin/seniors/${id}`);
 }
 
@@ -68,6 +70,7 @@ export async function archiveSenior(id: string) {
   const supabase = await createSupabaseServerClient();
   await setArchived(supabase, id, true);
   revalidatePath("/admin/seniors");
+  revalidatePath("/admin/map");
   revalidatePath(`/admin/seniors/${id}`);
 }
 
@@ -76,6 +79,7 @@ export async function unarchiveSenior(id: string) {
   const supabase = await createSupabaseServerClient();
   await setArchived(supabase, id, false);
   revalidatePath("/admin/seniors");
+  revalidatePath("/admin/map");
   revalidatePath(`/admin/seniors/${id}`);
 }
 
@@ -91,5 +95,6 @@ export async function permanentlyDeleteSenior(id: string, typedName: string) {
   const { error } = await supabase.rpc("delete_senior_cascade", { p_senior_id: id });
   if (error) throw error;
   revalidatePath("/admin/seniors");
+  revalidatePath("/admin/map");
   redirect("/admin/seniors?archived=true");
 }

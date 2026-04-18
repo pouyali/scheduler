@@ -6,6 +6,7 @@ import { parseSeniorsCsv, type ParsedRow } from "@/lib/csv/parse-seniors";
 import { buildErrorReport } from "@/lib/csv/error-report";
 import { geocodeAddress } from "@/lib/mapbox/geocode";
 import { insertSeniorsMany } from "@/lib/db/queries/seniors";
+import { seniorRowSchema } from "@/lib/validations/seniors";
 
 type PreviewRow = {
   rowNumber: number;
@@ -59,10 +60,15 @@ export async function POST(request: Request) {
     if (typeof payload !== "string") {
       return NextResponse.json({ error: "payload required" }, { status: 400 });
     }
-    const parsed = JSON.parse(payload) as {
-      rows: PreviewRow[];
-      confirmed: number[];
-    };
+    let parsed: { rows: PreviewRow[]; confirmed: number[] };
+    try {
+      parsed = JSON.parse(payload) as { rows: PreviewRow[]; confirmed: number[] };
+    } catch {
+      return NextResponse.json({ error: "invalid payload JSON" }, { status: 400 });
+    }
+    if (!Array.isArray(parsed.rows) || !Array.isArray(parsed.confirmed)) {
+      return NextResponse.json({ error: "payload shape invalid" }, { status: 400 });
+    }
     const supabase = await createSupabaseServerClient();
     const toInsert: Array<{
       first_name: string;
@@ -83,21 +89,29 @@ export async function POST(request: Request) {
     for (const r of parsed.rows) {
       const isConfirmed = parsed.confirmed.includes(r.rowNumber);
       if (!isConfirmed) continue;
-      if (r.errors.length > 0 || !r.data) {
-        rejected.push({ rowNumber: r.rowNumber, errors: r.errors, raw: r.raw });
+
+      // Re-validate every confirmed row server-side. Never trust the client payload.
+      const revalidate = seniorRowSchema.safeParse(r.raw);
+      if (!revalidate.success) {
+        const errors = revalidate.error.issues.map(
+          (iss) => `${iss.path.join(".") || "row"}: ${iss.message}`,
+        );
+        rejected.push({ rowNumber: r.rowNumber, errors, raw: r.raw });
         continue;
       }
+      const data = revalidate.data;
+
       toInsert.push({
-        first_name: r.data.first_name,
-        last_name: r.data.last_name,
-        phone: r.data.phone,
-        email: r.data.email ?? null,
-        address_line1: r.data.address_line1,
-        address_line2: r.data.address_line2 ?? null,
-        city: r.data.city,
-        province: r.data.province,
-        postal_code: r.data.postal_code,
-        notes: r.data.notes ?? null,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        email: data.email ?? null,
+        address_line1: data.address_line1,
+        address_line2: data.address_line2 ?? null,
+        city: data.city,
+        province: data.province,
+        postal_code: data.postal_code,
+        notes: data.notes ?? null,
         lat: r.geocode?.lat ?? null,
         lng: r.geocode?.lng ?? null,
         created_by: admin.userId,
