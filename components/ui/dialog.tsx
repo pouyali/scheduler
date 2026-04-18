@@ -13,11 +13,14 @@ export const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <DialogPrimitive.Portal>
-    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
+    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40" />
     <DialogPrimitive.Content
       ref={ref}
+      data-slot="dialog-content"
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg",
+        "fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2",
+        "rounded-[var(--radius-lg)] border border-border bg-card p-6 text-card-foreground",
+        "shadow-[var(--shadow-focus)]",
         className,
       )}
       {...props}
@@ -34,7 +37,8 @@ export function DialogTitle({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn("text-lg font-semibold leading-none", className)}
+      data-slot="dialog-title"
+      className={cn("text-lg font-semibold leading-none text-foreground", className)}
       {...props}
     />
   );
@@ -46,6 +50,7 @@ export function DialogDescription({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
+      data-slot="dialog-description"
       className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
