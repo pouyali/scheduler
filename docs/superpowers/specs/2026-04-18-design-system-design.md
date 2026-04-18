@@ -167,7 +167,7 @@ focus-visible:shadow-[--shadow-focus]
 focus-visible:outline-none
 ```
 
-Keyboard `ring-1` preserved at global level on `:focus-visible` for a11y; shadow is the visual affordance.
+A 2px blue `:focus-visible` outline is set at the global level for native elements (links, native buttons, third-party widgets). shadcn primitives carrying a `data-slot` attribute opt out of the global outline and use `focus-visible:shadow-[var(--shadow-focus)]` as their affordance instead. This preserves keyboard a11y without visually fighting the designed focus-shadow on styled components.
 
 ### Select
 
