@@ -8,7 +8,7 @@ export async function setup() {
       "Local Supabase not running. Run `npm run supabase:start` before integration tests.",
     );
   }
-  execSync("npx supabase db reset --no-backup", { stdio: "inherit" });
+  execSync("npx supabase db reset --yes", { stdio: "inherit" });
 }
 
 export async function teardown() {
