@@ -361,6 +361,36 @@ export type Database = {
           },
         ]
       }
+      volunteer_categories: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       volunteers: {
         Row: {
           approved_at: string | null
@@ -439,6 +469,20 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { user_id: string }; Returns: boolean }
+      seed_dev_fixtures: { Args: never; Returns: undefined }
+      seed_dev_volunteer: {
+        Args: {
+          p_approver: string
+          p_categories: string[]
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_phone: string
+          p_service_area: string
+          p_status: Database["public"]["Enums"]["volunteer_status"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       auth_provider: "email" | "google" | "admin_invite"
