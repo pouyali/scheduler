@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect } from "vitest";
 import { adminClient, createAdminUser, createVolunteerUser } from "./helpers";
 
 async function seedRequest(opts: {
@@ -94,6 +94,16 @@ describe("consume_response_token", () => {
     await admin.rpc("consume_response_token", { p_token: t1, p_action: "accept" });
     const { data } = await admin.rpc("consume_response_token", {
       p_token: t2,
+      p_action: "accept",
+    });
+    expect(data).toMatchObject({ outcome: "already_filled", request_id: request.id });
+  });
+
+  test("valid unused token for a cancelled request returns already_filled", async () => {
+    const { admin, request, t1 } = await seedRequest({});
+    await admin.from("service_requests").update({ status: "cancelled" }).eq("id", request.id);
+    const { data } = await admin.rpc("consume_response_token", {
+      p_token: t1,
       p_action: "accept",
     });
     expect(data).toMatchObject({ outcome: "already_filled", request_id: request.id });
