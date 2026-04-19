@@ -25,7 +25,7 @@ export default async function SeniorDetailPage({
           ← Back to seniors
         </Link>
         <div className="mt-2 flex items-center gap-3">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-h2">
             {senior.first_name} {senior.last_name}
           </h2>
           {senior.archived_at ? <StatusBadge variant="archived">Archived</StatusBadge> : null}
@@ -38,7 +38,7 @@ export default async function SeniorDetailPage({
       <SeniorEdit senior={senior} />
 
       <section>
-        <h3 className="text-sm font-semibold">Related activity</h3>
+        <h3 className="text-h3">Related activity</h3>
         <p className="text-sm text-muted-foreground">
           No requests yet. (Service requests ship in the next sub-project.)
         </p>

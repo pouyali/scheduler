@@ -68,7 +68,7 @@ export function SeniorForm() {
         <Label>Notes</Label>
         <Textarea name="notes" />
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-muted-foreground italic">{error}</p> : null}
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving…" : "Create senior"}

@@ -114,7 +114,7 @@ export function ImportWizard() {
         <li className={step === "done" ? "font-semibold" : "text-muted-foreground"}>3. Result</li>
       </ol>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-muted-foreground italic">{error}</p> : null}
 
       {step === "upload" ? (
         <div className="space-y-3">
@@ -164,7 +164,7 @@ export function ImportWizard() {
                 return (
                   <tr
                     key={r.rowNumber}
-                    className={isGeoFail ? "bg-amber-50" : !isValid ? "bg-red-50" : ""}
+                    className={isGeoFail || !isValid ? "bg-muted" : ""}
                   >
                     <td className="py-1">
                       <input
