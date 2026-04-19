@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getServiceRequestById, listRecipientsForRequest } from "@/lib/db/queries/service-requests";
 import { rankEligibleVolunteers } from "@/lib/matching/eligibility";
 import { DetailHeader } from "./detail-header";
@@ -47,8 +48,10 @@ export default async function RequestDetailPage({
       .map(v => ({ id: v.id, label: `${v.first_name} ${v.last_name}${v.inArea ? " (in-area)" : ""}` }));
   }
 
+  // listRecipientsForRequest reads response_tokens which is service-role only per spec.
+  // requireAdmin() above already verifies the caller is an admin.
   const recipients = ["notified", "accepted", "completed", "cancelled"].includes(request.status)
-    ? await listRecipientsForRequest(supabase, request.id)
+    ? await listRecipientsForRequest(createSupabaseAdminClient(), request.id)
     : [];
 
   return (

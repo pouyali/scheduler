@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/db/types";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   cancelServiceRequest,
   reopenServiceRequest,
@@ -36,7 +37,9 @@ const SendSchema = z.object({
 export async function sendInvitesAction(input: z.infer<typeof SendSchema>) {
   const parsed = SendSchema.parse(input);
   await requireAdmin();
-  const supabase = await createSupabaseServerClient();
+  // Use the service-role client here: response_tokens has no authenticated INSERT policy
+  // (intentionally service-role only per spec). requireAdmin() above already verifies caller.
+  const supabase = createSupabaseAdminClient();
   const res = await _sendInvitesForAdmin(supabase, {
     requestId: parsed.requestId,
     volunteerIds: parsed.volunteerIds,
@@ -205,7 +208,8 @@ export async function reassignRequestAction(input: { id: string; newVolunteerId:
   // `open` state (with no tokens). Risk window is tiny and Phase 1 scale; if it
   // becomes a problem, wrap these steps in a single RPC similar to cancel_service_request.
   await requireAdmin();
-  const supabase = await createSupabaseServerClient();
+  // Use service-role client: response_tokens has no authenticated INSERT policy (service-role only per spec).
+  const supabase = createSupabaseAdminClient();
   const req = await getServiceRequestById(supabase, input.id);
   if (!req) throw new Error("Request not found");
 
@@ -257,7 +261,8 @@ export async function markCompletedAction(id: string) {
 
 export async function retryNotificationAction(notificationId: string) {
   await requireAdmin();
-  const supabase = await createSupabaseServerClient();
+  // Use service-role client: response_tokens has no authenticated policy (service-role only per spec).
+  const supabase = createSupabaseAdminClient();
   const { data: n } = await supabase
     .from("notifications")
     .select("request_id, volunteer_id, event_type")
