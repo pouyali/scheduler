@@ -6,7 +6,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/db/types";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   cancelServiceRequest,
   reopenServiceRequest,
@@ -58,13 +57,19 @@ export async function _sendInvitesForAdmin(
     appUrl: string;
     notifier: NotificationService;
   },
-): Promise<{ sent: number; failed: number }> {
+): Promise<{ sent: number; failed: number; skipped: number }> {
   if (opts.volunteerIds.length > 25 && !opts.confirmed) {
     throw new Error("Please confirm before sending to more than 25 volunteers.");
   }
 
   const req = await getServiceRequestById(supabase, opts.requestId);
   if (!req) throw new Error("Request not found");
+
+  // Fix S1: Guard against non-open request status to prevent accidental double-broadcast.
+  // The UI already hides the picker when status != open, but defense in depth.
+  if (req.status !== "open") {
+    throw new Error(`Cannot send invites: request is ${req.status}, must be open.`);
+  }
 
   const { data: senior, error: sErr } = await supabase
     .from("seniors")
@@ -79,10 +84,23 @@ export async function _sendInvitesForAdmin(
     .in("id", opts.volunteerIds);
   if (vErr) throw vErr;
 
+  // Fix C2: Skip volunteers who already hold an active token for this request.
+  // A re-broadcast shouldn't issue a second token to someone who could still
+  // accept via their first one — otherwise "first-to-accept wins" breaks.
+  const { data: existingToks, error: etErr } = await supabase
+    .from("response_tokens")
+    .select("volunteer_id")
+    .eq("request_id", req.id)
+    .is("used_at", null)
+    .gt("expires_at", new Date().toISOString());
+  if (etErr) throw etErr;
+  const alreadyLive = new Set((existingToks ?? []).map(t => t.volunteer_id));
+  const toSend = (vols ?? []).filter(v => !alreadyLive.has(v.id));
+
   const expires = computeTokenExpiry(req.requested_date).toISOString();
 
   let sent = 0, failed = 0;
-  for (const v of vols!) {
+  for (const v of toSend) {
     const token = newToken();
     const { error: tErr } = await supabase.from("response_tokens").insert({
       token, request_id: req.id, volunteer_id: v.id, expires_at: expires,
@@ -115,9 +133,14 @@ export async function _sendInvitesForAdmin(
     }
   }
 
-  await supabase.from("service_requests").update({ status: "notified" }).eq("id", req.id);
+  // Fix C1: Only flip to 'notified' if at least one email got out. If every send failed,
+  // leave the request 'open' so the admin can retry the whole broadcast or
+  // individually via the failed notification rows.
+  if (sent > 0) {
+    await supabase.from("service_requests").update({ status: "notified" }).eq("id", req.id);
+  }
 
-  return { sent, failed };
+  return { sent, failed, skipped: (vols?.length ?? 0) - toSend.length };
 }
 
 // --- CANCEL ---
@@ -125,13 +148,14 @@ export async function _sendInvitesForAdmin(
 export async function cancelRequestAction(input: { id: string; reason?: string; notifyRecipients: boolean }) {
   await requireAdmin();
   const supabase = await createSupabaseServerClient();
-  const admin = createSupabaseAdminClient();
 
   const req = await getServiceRequestById(supabase, input.id);
   if (!req) throw new Error("Request not found");
 
   if (input.notifyRecipients) {
-    const { data: recipients } = await admin
+    // Fix I1: Use the authenticated server client (supabase) — it already has admin-level
+    // access via RLS. No need for the service-role client here.
+    const { data: recipients } = await supabase
       .from("notifications")
       .select("volunteer_id, volunteers:volunteers(first_name, email)")
       .eq("request_id", input.id);
@@ -149,10 +173,13 @@ export async function cancelRequestAction(input: { id: string; reason?: string; 
         reason: input.reason,
         dashboardUrl,
       });
-      await notifier.sendEmail(email);
-      await admin.from("notifications").insert({
+      // Fix I2/S3: Capture send result and reflect actual status in the notification row.
+      const sendRes = await notifier.sendEmail(email);
+      await supabase.from("notifications").insert({
         request_id: input.id, volunteer_id: r.volunteer_id,
-        channel: "email", status: "sent", event_type: "cancellation",
+        channel: "email",
+        status: sendRes.ok ? "sent" : "failed",
+        event_type: "cancellation",
       });
     }
   }
@@ -173,30 +200,39 @@ export async function reopenRequestAction(id: string) {
 // --- REASSIGN ---
 
 export async function reassignRequestAction(input: { id: string; newVolunteerId: string }) {
+  // Fix M2: Reassign is deliberately non-atomic: reopen → issue token → email → set notified.
+  // A volunteer or admin loading the page during the gap sees the intermediate
+  // `open` state (with no tokens). Risk window is tiny and Phase 1 scale; if it
+  // becomes a problem, wrap these steps in a single RPC similar to cancel_service_request.
   await requireAdmin();
   const supabase = await createSupabaseServerClient();
   const req = await getServiceRequestById(supabase, input.id);
   if (!req) throw new Error("Request not found");
 
   await reopenServiceRequest(supabase, input.id);
+
+  // Fix I3: Null-guard senior and volunteer lookups with explicit error messages.
   const { data: senior } = await supabase.from("seniors").select("first_name, city").eq("id", req.senior_id).single();
+  if (!senior) throw new Error(`Senior ${req.senior_id} not found`);
+
   const { data: vol } = await supabase.from("volunteers").select("id, first_name, email").eq("id", input.newVolunteerId).single();
+  if (!vol) throw new Error(`Volunteer ${input.newVolunteerId} not found`);
 
   const expires = computeTokenExpiry(req.requested_date).toISOString();
   const token = newToken();
   await supabase.from("response_tokens").insert({
-    token, request_id: req.id, volunteer_id: vol!.id, expires_at: expires,
+    token, request_id: req.id, volunteer_id: vol.id, expires_at: expires,
   });
   await supabase.from("notifications").insert({
-    request_id: req.id, volunteer_id: vol!.id, channel: "email",
+    request_id: req.id, volunteer_id: vol.id, channel: "email",
     status: "sent", event_type: "reassignment_invite",
   });
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const email = renderServiceRequestInvite({
-    to: vol!.email,
-    volunteerFirstName: vol!.first_name,
-    seniorFirstName: senior!.first_name,
-    seniorCity: senior!.city,
+    to: vol.email,
+    volunteerFirstName: vol.first_name,
+    seniorFirstName: senior.first_name,
+    seniorCity: senior.city,
     category: req.category,
     requestedDate: req.requested_date,
     descriptionExcerpt: (req.description ?? "").slice(0, 240),
