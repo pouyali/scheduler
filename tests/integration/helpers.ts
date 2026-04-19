@@ -67,3 +67,21 @@ export async function signIn(email: string, password = "password123!") {
   if (error) throw error;
   return client;
 }
+
+/**
+ * Delete every row from the given tables using the service-role client.
+ * Equivalent to a truncate for tests: no reliance on SQL sequences, just wipes
+ * the data so each test starts from a clean slate.
+ */
+export async function truncate(
+  admin: ReturnType<typeof adminClient>,
+  tables: string[],
+): Promise<void> {
+  for (const table of tables) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic table name; Supabase typed API can't express this
+    const { error } = await (admin.from(table as any) as any)
+      .delete()
+      .not("id", "is", null);
+    if (error) throw error;
+  }
+}
