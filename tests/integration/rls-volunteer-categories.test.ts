@@ -23,7 +23,17 @@ describe("RLS: volunteer_categories", () => {
     // auth.users is not cleared here; unique emails per test avoid collisions
     // on repeated `npm run test:integration` runs (the setup hook resets the
     // whole DB once at suite start, so auth.users is empty initially).
-    await truncate(admin, ["volunteer_categories", "volunteers"]);
+    // Order matters: response_tokens, notifications, service_requests reference
+    // volunteers. Deleting them first avoids the FK ON DELETE SET NULL triggering
+    // the service_requests_accepted_has_assignee check constraint on any leftover
+    // accepted row from an earlier test in the same suite run.
+    await truncate(admin, [
+      "response_tokens",
+      "notifications",
+      "service_requests",
+      "volunteer_categories",
+      "volunteers",
+    ]);
   });
 
   it("volunteer can select categories", async () => {
