@@ -1,15 +1,22 @@
 import { z } from "zod";
 
+// FormData.get() returns null for absent fields, so preprocess null → "" for string inputs.
 const requiredString = (field: string) =>
+  z.preprocess(
+    (v) => (v === null || v === undefined ? "" : v),
+    z
+      .string()
+      .transform((v) => v.trim())
+      .refine((v) => v.length > 0, { message: `${field} is required` }),
+  );
+
+const optionalString = z.preprocess(
+  (v) => (v === null || v === undefined ? "" : v),
   z
     .string()
-    .transform((v) => v.trim())
-    .refine((v) => v.length > 0, { message: `${field} is required` });
-
-const optionalString = z
-  .string()
-  .transform((v) => (v.trim() === "" ? undefined : v.trim()))
-  .optional();
+    .transform((v) => (v.trim() === "" ? undefined : v.trim()))
+    .optional(),
+);
 
 const optionalCoercedNumber = z.preprocess(
   (v) => (v === "" || v === null || v === undefined ? undefined : v),
