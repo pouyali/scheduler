@@ -68,15 +68,23 @@ export function NewRequestForm({ categories }: { categories: { slug: string; nam
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="requested_date">Requested date</Label>
-        <Input
-          id="requested_date"
-          type="date"
-          name="requested_date"
-        />
-        {errors.requested_date && (
-          <p className="text-sm italic text-muted-foreground">{errors.requested_date}</p>
-        )}
+        <Label>Requested date &amp; time</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="requested_date">Date</Label>
+            <Input id="requested_date" type="date" name="requested_date" />
+            {errors.requested_date && (
+              <p className="text-sm italic text-muted-foreground">{errors.requested_date}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="requested_time">Time</Label>
+            <Input id="requested_time" type="time" name="requested_time" step={900} />
+            {errors.requested_time && (
+              <p className="text-sm italic text-muted-foreground">{errors.requested_time}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="space-y-1.5">

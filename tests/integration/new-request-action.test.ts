@@ -8,7 +8,8 @@ describe("createRequestAction", () => {
       senior_id: "",
       category: "",
       priority: "normal",
-      requested_at: "",
+      requested_date: "",
+      requested_time: "",
       description: "",
     } as never);
     expect(result.ok).toBe(false);
