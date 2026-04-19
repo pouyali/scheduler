@@ -43,7 +43,7 @@ export default async function VolunteerDashboardPage() {
     .select(`
       request_id,
       service_requests:service_requests!inner(
-        id, category, requested_date, description, status,
+        id, category, requested_at, description, status,
         seniors:seniors!inner(first_name, city)
       )
     `)
@@ -55,31 +55,30 @@ export default async function VolunteerDashboardPage() {
   const inviteCards = (invites ?? []).map((r) => {
     const req = (r as unknown as {
       service_requests: {
-        id: string; category: string; requested_date: string; description: string | null;
+        id: string; category: string; requested_at: string; description: string | null;
         seniors: { first_name: string; city: string };
       };
     }).service_requests;
     return {
       requestId: req.id,
       category: req.category,
-      requestedDate: req.requested_date,
+      requestedAt: req.requested_at,
       seniorFirstName: req.seniors.first_name,
       seniorCity: req.seniors.city,
       descriptionExcerpt: (req.description ?? "").slice(0, 180),
     };
   });
 
-  const today = new Date().toISOString().slice(0, 10);
   const { data: upcoming } = await supabase
     .from("service_requests")
     .select(`
-      id, category, requested_date, description,
+      id, category, requested_at, description,
       seniors:seniors(first_name, last_name, address_line1, city, phone)
     `)
     .eq("assigned_volunteer_id", role.userId)
     .eq("status", "accepted")
-    .gte("requested_date", today)
-    .order("requested_date");
+    .gte("requested_at", new Date().toISOString())
+    .order("requested_at");
 
   return (
     <div className="space-y-8">
@@ -108,7 +107,11 @@ export default async function VolunteerDashboardPage() {
                     {s.first_name} {s.last_name} — {r.category}
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {r.requested_date} · {s.address_line1}, {s.city} · {s.phone}
+                    {new Date((r as unknown as { requested_at: string }).requested_at).toLocaleString("en-CA", {
+                      timeZone: "America/Toronto",
+                      year: "numeric", month: "short", day: "numeric",
+                      hour: "2-digit", minute: "2-digit",
+                    })} · {s.address_line1}, {s.city} · {s.phone}
                   </p>
                 </li>
               );

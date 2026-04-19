@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 type Invite = {
   requestId: string;
   category: string;
-  requestedDate: string;
+  requestedAt: string;
   seniorFirstName: string;
   seniorCity: string;
   descriptionExcerpt: string;
@@ -20,7 +20,12 @@ export function InviteCard({ invite }: { invite: Invite }) {
     <article className="rounded-[var(--radius-lg)] border border-border p-4 space-y-2">
       <header className="flex items-center justify-between">
         <StatusBadge variant="open">{invite.category}</StatusBadge>
-        <time className="text-sm text-muted-foreground">{invite.requestedDate}</time>
+        <time className="text-sm text-muted-foreground">
+          {new Date(invite.requestedAt).toLocaleString("en-CA", {
+            timeZone: "America/Toronto",
+            month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+          })}
+        </time>
       </header>
       <p className="text-sm"><strong>{invite.seniorFirstName}</strong> · {invite.seniorCity}</p>
       <p className="text-sm text-muted-foreground">{invite.descriptionExcerpt}</p>
