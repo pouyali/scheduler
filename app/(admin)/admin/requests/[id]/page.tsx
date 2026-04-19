@@ -7,6 +7,7 @@ import { DetailHeader } from "./detail-header";
 import { EligiblePicker } from "./eligible-picker";
 import { RecipientsTable } from "./recipients-table";
 import { ActivityLog } from "./activity-log";
+import { ActionMenu } from "./action-menu";
 
 export default async function RequestDetailPage({
   params,
@@ -34,6 +35,18 @@ export default async function RequestDetailPage({
     ranked = rankEligibleVolunteers(vols ?? [], { city: senior.city }, request.category);
   }
 
+  let reassignChoices: { id: string; label: string }[] = [];
+  if (request.status === "accepted") {
+    const { data: vols } = await supabase
+      .from("volunteers")
+      .select("id, first_name, last_name, categories, service_area, status")
+      .eq("status", "active");
+    const ranked2 = rankEligibleVolunteers(vols ?? [], { city: senior.city }, request.category);
+    reassignChoices = ranked2
+      .filter(v => v.id !== request.assigned_volunteer_id)
+      .map(v => ({ id: v.id, label: `${v.first_name} ${v.last_name}${v.inArea ? " (in-area)" : ""}` }));
+  }
+
   const recipients = ["notified", "accepted", "completed", "cancelled"].includes(request.status)
     ? await listRecipientsForRequest(supabase, request.id)
     : [];
@@ -45,6 +58,7 @@ export default async function RequestDetailPage({
         senior={senior}
         assigneeName={assignee ? `${assignee.first_name} ${assignee.last_name}` : null}
       />
+      <ActionMenu id={request.id} status={request.status} eligibleForReassign={reassignChoices} />
       {request.status === "open" && <EligiblePicker requestId={request.id} volunteers={ranked} />}
       {recipients.length > 0 && <RecipientsTable rows={recipients} />}
       <ActivityLog request={request} recipients={recipients} />
