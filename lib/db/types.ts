@@ -476,6 +476,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_service_request: {
+        Args: { p_id: string; p_reason: string }
+        Returns: Json
+      }
       consume_response_token: {
         Args: { p_action: string; p_token: string }
         Returns: Json

@@ -27,11 +27,24 @@ export async function listServiceRequests(
   filters: ListFilters = {},
 ): Promise<{ rows: Row[]; nextCursor: { requested_date: string; id: string } | null }> {
   const limit = filters.limit ?? 50;
-  let q = supabase.from("service_requests").select("*");
+
+  // Base select. When `q` is provided, inner-join seniors so we can filter by name.
+  const selectStr = filters.q?.trim()
+    ? "*, seniors!inner(first_name, last_name)"
+    : "*";
+
+  let q = supabase.from("service_requests").select(selectStr);
 
   if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
   if (filters.dateFrom) q = q.gte("requested_date", filters.dateFrom);
   if (filters.dateTo) q = q.lte("requested_date", filters.dateTo);
+
+  if (filters.q?.trim()) {
+    const escaped = filters.q.trim().replace(/[%_]/g, "").replace(/"/g, '""');
+    const term = `"%${escaped}%"`;
+    q = q.or(`first_name.ilike.${term},last_name.ilike.${term}`, { foreignTable: "seniors" });
+  }
+
   if (filters.cursor) {
     const d = filters.cursor.requested_date;
     const id = filters.cursor.id;
@@ -45,8 +58,13 @@ export async function listServiceRequests(
 
   const { data, error } = await q;
   if (error) throw error;
-  const hasMore = data.length > limit;
-  const rows = hasMore ? data.slice(0, limit) : data;
+
+  // When we inner-joined seniors for search, strip the join data back out to match Row type.
+  const raw = data as unknown as (Row & { seniors?: unknown })[];
+  const rowsData: Row[] = raw.map(({ seniors: _s, ...rest }) => rest as Row);
+
+  const hasMore = rowsData.length > limit;
+  const rows = hasMore ? rowsData.slice(0, limit) : rowsData;
   const last = rows[rows.length - 1];
   const nextCursor =
     hasMore && last ? { requested_date: last.requested_date, id: last.id } : null;
@@ -84,6 +102,10 @@ export type UpdateInput = Partial<{
   description: string | null;
 }>;
 
+// Enforces the edit-lock rule at the app layer only (read status → check → write,
+// no transaction). A concurrent status transition (e.g., open → notified) between
+// the read and write could let a locked field through. Acceptable for Phase 1;
+// Server Actions must re-read the returned row and surface stale-status to the UI.
 export async function updateServiceRequest(
   supabase: Client, id: string, input: UpdateInput,
 ): Promise<Row> {
@@ -109,26 +131,18 @@ export async function updateServiceRequest(
 export async function cancelServiceRequest(
   supabase: Client, id: string, opts: { reason?: string | null },
 ): Promise<Row> {
-  // Supersede any outstanding tokens.
-  const { error: tErr } = await supabase
-    .from("response_tokens")
-    .update({ used_at: new Date().toISOString(), action: "superseded" })
-    .eq("request_id", id)
-    .is("used_at", null);
-  if (tErr) throw tErr;
+  // The generated type emits p_reason as `string` because the Supabase TS generator
+  // doesn't model nullable text args; the Postgres function accepts NULL fine at runtime.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- nullable text param, safe at runtime
+  const { error: rpcErr } = await supabase.rpc("cancel_service_request", {
+    p_id: id,
+    p_reason: (opts.reason ?? null) as any,
+  });
+  if (rpcErr) throw rpcErr;
 
-  const { data, error } = await supabase
-    .from("service_requests")
-    .update({
-      status: "cancelled",
-      cancelled_at: new Date().toISOString(),
-      cancelled_reason: opts.reason ?? null,
-    })
-    .eq("id", id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  const row = await getServiceRequestById(supabase, id);
+  if (!row) throw new Error(`Request ${id} not found after cancellation`);
+  return row;
 }
 
 export async function reopenServiceRequest(supabase: Client, id: string): Promise<Row> {
@@ -192,6 +206,9 @@ export async function listRecipientsForRequest(
   const tokByVol = new Map(tokens!.map(t => [t.volunteer_id, t]));
 
   return notifs!.map((n) => {
+    // Supabase JS client can't narrow the relation join shape from a string select
+    // expression. The volunteers FK is defined in the generated types, so the runtime
+    // shape is safe; the cast is a TS-only workaround.
     const vol = (n as unknown as { volunteers: { first_name: string; last_name: string; email: string } }).volunteers;
     const tok = tokByVol.get(n.volunteer_id);
     return {
@@ -213,15 +230,17 @@ export async function countRequestsByStatus(
   supabase: Client,
 ): Promise<Record<Status, number>> {
   const statuses: Status[] = ["open", "notified", "accepted", "completed", "cancelled"];
-  const result: Record<string, number> = {};
-  for (const s of statuses) {
-    const { count } = await supabase
-      .from("service_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("status", s);
-    result[s] = count ?? 0;
-  }
-  return result as Record<Status, number>;
+  const results = await Promise.all(
+    statuses.map(async (s) => {
+      const { count, error } = await supabase
+        .from("service_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("status", s);
+      if (error) throw error;
+      return [s, count ?? 0] as const;
+    }),
+  );
+  return Object.fromEntries(results) as Record<Status, number>;
 }
 
 export async function countPendingInvitesForVolunteer(
