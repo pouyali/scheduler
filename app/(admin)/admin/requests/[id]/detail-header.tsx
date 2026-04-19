@@ -18,7 +18,11 @@ export function DetailHeader({
         <StatusBadge variant={request.priority as "low" | "normal" | "high"}>{request.priority}</StatusBadge>
       </div>
       <p className="text-sm text-muted-foreground">
-        {request.requested_date} · {senior.address_line1}, {senior.city}, {senior.province} {senior.postal_code} · {senior.phone}
+        {new Date(request.requested_at).toLocaleString("en-CA", {
+          timeZone: "America/Toronto",
+          year: "numeric", month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit",
+        })} · {senior.address_line1}, {senior.city}, {senior.province} {senior.postal_code} · {senior.phone}
       </p>
       {assigneeName && <p className="text-sm">Assigned: <strong>{assigneeName}</strong></p>}
       {request.description && <p className="mt-2 whitespace-pre-wrap text-sm">{request.description}</p>}
