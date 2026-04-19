@@ -10,6 +10,7 @@ import {
   markRequestCompleted,
   listRecipientsForRequest,
   countRequestsByStatus,
+  countPendingInvitesForVolunteer,
 } from "@/lib/db/queries/service-requests";
 
 async function seedSenior() {
@@ -130,5 +131,76 @@ describe("service_requests queries", () => {
     });
     const counts = await countRequestsByStatus(admin);
     expect(counts.open).toBeGreaterThan(0);
+  });
+
+  test("listRecipientsForRequest returns joined volunteer + token data", async () => {
+    const { admin, senior, adminId } = await seedSenior();
+    const created = await createServiceRequest(admin, {
+      senior_id: senior.id, category: "transportation", priority: "normal",
+      requested_date: "2030-01-15", description: "x", created_by: adminId,
+    });
+    await admin.from("service_requests").update({ status: "notified" }).eq("id", created.id);
+
+    const { createVolunteerUser } = await import("./helpers");
+    const v = await createVolunteerUser(`v-rec-${Date.now()}@t.local`, "active");
+
+    await admin.from("notifications").insert({
+      request_id: created.id, volunteer_id: v.userId, channel: "email",
+      status: "sent", event_type: "invite",
+    });
+    await admin.from("response_tokens").insert({
+      token: `rec-tok-${Date.now()}`, request_id: created.id, volunteer_id: v.userId,
+      expires_at: new Date(Date.now() + 3600_000).toISOString(),
+    });
+
+    const rows = await listRecipientsForRequest(admin, created.id);
+    expect(rows.length).toBe(1);
+    expect(rows[0].volunteer_id).toBe(v.userId);
+    expect(rows[0].volunteer_first_name).toBe("Test");
+    expect(rows[0].event_type).toBe("invite");
+    expect(rows[0].token_action).toBeNull();
+  });
+
+  test("countPendingInvitesForVolunteer — counts only unused, unexpired tokens", async () => {
+    const { admin, senior, adminId } = await seedSenior();
+    const created = await createServiceRequest(admin, {
+      senior_id: senior.id, category: "transportation", priority: "normal",
+      requested_date: "2030-01-15", description: "x", created_by: adminId,
+    });
+
+    const { createVolunteerUser } = await import("./helpers");
+    const v = await createVolunteerUser(`v-pend-${Date.now()}@t.local`, "active");
+
+    // live token
+    await admin.from("response_tokens").insert({
+      token: `live-${Date.now()}`, request_id: created.id, volunteer_id: v.userId,
+      expires_at: new Date(Date.now() + 3600_000).toISOString(),
+    });
+    // expired token
+    await admin.from("response_tokens").insert({
+      token: `exp-${Date.now()}`, request_id: created.id, volunteer_id: v.userId,
+      expires_at: new Date(Date.now() - 3600_000).toISOString(),
+    });
+    // used token
+    await admin.from("response_tokens").insert({
+      token: `used-${Date.now()}`, request_id: created.id, volunteer_id: v.userId,
+      expires_at: new Date(Date.now() + 3600_000).toISOString(),
+      used_at: new Date().toISOString(), action: "decline",
+    });
+
+    const count = await countPendingInvitesForVolunteer(admin, v.userId);
+    expect(count).toBe(1);
+  });
+
+  test("cancelServiceRequest rejects terminal (completed) requests", async () => {
+    const { admin, senior, adminId } = await seedSenior();
+    const created = await createServiceRequest(admin, {
+      senior_id: senior.id, category: "transportation", priority: "normal",
+      requested_date: "2030-01-15", description: "x", created_by: adminId,
+    });
+    await admin.from("service_requests").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", created.id);
+    await expect(
+      cancelServiceRequest(admin, created.id, { reason: "nope" }),
+    ).rejects.toThrow(/already|cannot be cancelled/i);
   });
 });
