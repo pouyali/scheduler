@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getServiceRequestById } from "@/lib/db/queries/service-requests";
+import { getServiceRequestById, listRecipientsForRequest } from "@/lib/db/queries/service-requests";
 import { rankEligibleVolunteers } from "@/lib/matching/eligibility";
 import { DetailHeader } from "./detail-header";
 import { EligiblePicker } from "./eligible-picker";
+import { RecipientsTable } from "./recipients-table";
+import { ActivityLog } from "./activity-log";
 
 export default async function RequestDetailPage({
   params,
@@ -32,6 +34,10 @@ export default async function RequestDetailPage({
     ranked = rankEligibleVolunteers(vols ?? [], { city: senior.city }, request.category);
   }
 
+  const recipients = ["notified", "accepted", "completed", "cancelled"].includes(request.status)
+    ? await listRecipientsForRequest(supabase, request.id)
+    : [];
+
   return (
     <section className="space-y-6">
       <DetailHeader
@@ -40,6 +46,8 @@ export default async function RequestDetailPage({
         assigneeName={assignee ? `${assignee.first_name} ${assignee.last_name}` : null}
       />
       {request.status === "open" && <EligiblePicker requestId={request.id} volunteers={ranked} />}
+      {recipients.length > 0 && <RecipientsTable rows={recipients} />}
+      <ActivityLog request={request} recipients={recipients} />
     </section>
   );
 }
