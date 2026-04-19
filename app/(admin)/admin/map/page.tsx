@@ -36,24 +36,30 @@ export default async function AdminMapPage({ searchParams }: { searchParams: Sea
         {missing > 0 ? (
           <Link
             href="/admin/seniors?not_geocoded=true"
-            className="text-sm text-amber-700 underline"
+            className="text-sm italic text-muted-foreground underline underline-offset-2"
           >
             {missing} seniors not shown (no coordinates) — fix
           </Link>
         ) : null}
       </div>
-      <div className="flex flex-wrap items-center gap-2 border border-border rounded-[var(--radius-lg)] bg-card p-3">
-        <span className="text-sm text-muted-foreground">City</span>
-        <Button asChild variant="pill" size="sm">
-          <Link href="/admin/map">All</Link>
-        </Button>
-        {cities.map((c) => (
-          <Button key={c} asChild variant="pill" size="sm">
-            <Link href={`/admin/map?city=${encodeURIComponent(c)}`}>{c}</Link>
+      <div className="border border-border rounded-[var(--radius-lg)] bg-card p-3">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="shrink-0 text-sm text-muted-foreground">City</span>
+          <Button asChild variant="pill" size="sm" className="shrink-0">
+            <Link href="/admin/map">All</Link>
           </Button>
-        ))}
+          {cities.map((c) => (
+            <Button key={c} asChild variant="pill" size="sm" className="shrink-0">
+              <Link href={`/admin/map?city=${encodeURIComponent(c)}`}>{c}</Link>
+            </Button>
+          ))}
+        </div>
       </div>
-      <MapView pins={pins} cluster className="h-[70vh] w-full rounded-md border" />
+      <MapView
+        pins={pins}
+        cluster
+        className="h-[70vh] w-full rounded-[var(--radius-lg)] border border-border"
+      />
     </div>
   );
 }
