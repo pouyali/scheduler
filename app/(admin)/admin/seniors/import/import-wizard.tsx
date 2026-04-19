@@ -148,7 +148,7 @@ export function ImportWizard() {
           </Button>
           <table className="w-full border-collapse text-sm">
             <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr>
+              <tr className="border-b border-border">
                 <th className="py-2">Include</th>
                 <th>Row</th>
                 <th>Name</th>
@@ -161,11 +161,13 @@ export function ImportWizard() {
               {preview.rows.map((r) => {
                 const isValid = r.errors.length === 0;
                 const isGeoFail = isValid && !r.geocode;
+                const rowClass = !isValid
+                  ? "italic text-muted-foreground border-l-2 border-foreground/20"
+                  : isGeoFail
+                    ? "bg-muted"
+                    : "";
                 return (
-                  <tr
-                    key={r.rowNumber}
-                    className={isGeoFail || !isValid ? "bg-muted" : ""}
-                  >
+                  <tr key={r.rowNumber} className={rowClass}>
                     <td className="py-1">
                       <input
                         type="checkbox"
