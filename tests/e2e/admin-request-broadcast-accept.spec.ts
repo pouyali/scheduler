@@ -44,6 +44,7 @@ test("admin broadcasts, first volunteer to accept wins, sibling is superseded", 
   await page.getByRole("button", { name: /E2E Senior/ }).first().click();
   await page.selectOption("select[name=category]", { label: "Transportation" });
   await page.fill("input[name=requested_date]", "2030-06-01");
+  await page.fill("input[name=requested_time]", "10:00");
   await page.fill("textarea[name=description]", "e2e test request");
   await page.getByRole("button", { name: /create request/i }).click();
   await expect(page).toHaveURL(/\/admin\/requests\/[0-9a-f-]+$/);

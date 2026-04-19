@@ -28,7 +28,7 @@ test("admin cancels a notified request and volunteer dashboard invite disappears
   }).select().single();
   const { data: req } = await svc.from("service_requests").insert({
     senior_id: senior!.id, category: "transportation", priority: "normal",
-    requested_date: "2030-06-01", description: "x", created_by: adminId, status: "notified",
+    requested_at: "2030-06-01T14:00:00.000Z", description: "x", created_by: adminId, status: "notified",
   }).select().single();
   await svc.from("response_tokens").insert({
     token: `cancel-tok-${ts}`, request_id: req!.id, volunteer_id: vid,
