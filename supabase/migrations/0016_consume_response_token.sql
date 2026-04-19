@@ -14,7 +14,6 @@ as $$
 declare
   v_token public.response_tokens%rowtype;
   v_req_status request_status;
-  v_req_id uuid;
   v_updated int;
 begin
   if p_action not in ('accept', 'decline') then
@@ -42,6 +41,15 @@ begin
     return jsonb_build_object('outcome', 'expired');
   end if;
 
+  -- Decline path: no service_requests lock needed — we only write to response_tokens.
+  if p_action = 'decline' then
+    update public.response_tokens
+    set used_at = now(), action = 'decline', updated_at = now()
+    where id = v_token.id;
+    return jsonb_build_object('outcome', 'declined', 'request_id', v_token.request_id);
+  end if;
+
+  -- Accept path: lock the request row and check for terminal status before transitioning.
   select status into v_req_status
   from public.service_requests
   where id = v_token.request_id
@@ -51,14 +59,6 @@ begin
     return jsonb_build_object('outcome', 'already_filled', 'request_id', v_token.request_id);
   end if;
 
-  if p_action = 'decline' then
-    update public.response_tokens
-    set used_at = now(), action = 'decline', updated_at = now()
-    where id = v_token.id;
-    return jsonb_build_object('outcome', 'declined', 'request_id', v_token.request_id);
-  end if;
-
-  -- Accept path: atomically transition the request.
   update public.service_requests
   set status = 'accepted',
       assigned_volunteer_id = v_token.volunteer_id,
@@ -72,11 +72,12 @@ begin
     return jsonb_build_object('outcome', 'already_filled', 'request_id', v_token.request_id);
   end if;
 
+  -- Mark this token as accepted. The 0009 trigger has just run and
+  -- (incorrectly for our winner) marked this token as 'superseded' —
+  -- we overwrite that back to 'accept' here in the same transaction.
   update public.response_tokens
   set used_at = now(), action = 'accept', updated_at = now()
   where id = v_token.id;
-
-  -- The existing 0009 trigger supersedes sibling tokens on status → accepted.
 
   return jsonb_build_object('outcome', 'accepted', 'request_id', v_token.request_id);
 end;
