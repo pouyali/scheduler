@@ -11,9 +11,13 @@ import {
   reactivateVolunteer,
   findVolunteerByEmail,
   createVolunteerProfile,
+  updateVolunteerProfile,
 } from "@/lib/db/queries/volunteers";
 import { listCategories } from "@/lib/db/queries/volunteer-categories";
-import { adminCreateVolunteerSchema } from "@/lib/validations/volunteers";
+import {
+  adminCreateVolunteerSchema,
+  updateVolunteerSchema,
+} from "@/lib/validations/volunteers";
 import { renderVolunteerInvite } from "@/lib/notifications/templates/volunteer-invite";
 import { createNotificationService } from "@/lib/notifications/factory";
 
@@ -154,4 +158,68 @@ export async function createVolunteerAction(
 
   revalidatePath("/admin/volunteers");
   redirect(`/admin/volunteers/${invited.user.id}`);
+}
+
+export type UpdateVolunteerState =
+  | { error?: string; fieldErrors?: Record<string, string>; ok?: boolean }
+  | undefined;
+
+export async function updateVolunteerAction(
+  id: string,
+  _prev: UpdateVolunteerState,
+  formData: FormData,
+): Promise<UpdateVolunteerState> {
+  await requireAdmin();
+  const rawCategories = formData.getAll("categories").map(String);
+  const parsed = updateVolunteerSchema.safeParse({
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    phone: formData.get("phone"),
+    categories: rawCategories,
+    service_area: formData.get("service_area"),
+    home_address: formData.get("home_address"),
+    home_lat: formData.get("home_lat"),
+    home_lng: formData.get("home_lng"),
+  });
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      fieldErrors[issue.path.join(".")] = issue.message;
+    }
+    return { fieldErrors };
+  }
+  const supabase = await createSupabaseServerClient();
+  try {
+    await updateVolunteerProfile(supabase, id, parsed.data);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Update failed" };
+  }
+  revalidatePath(`/admin/volunteers/${id}`);
+  return { ok: true };
+}
+
+export async function resendInviteAction(id: string): Promise<void> {
+  await requireAdmin();
+  const adminSupabase = createSupabaseAdminClient();
+  const { data: v } = await adminSupabase
+    .from("volunteers")
+    .select("email,first_name")
+    .eq("id", id)
+    .single();
+  if (!v) throw new Error("Volunteer not found");
+  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+  const link = await adminSupabase.auth.admin.generateLink({
+    type: "invite",
+    email: v.email,
+    options: { redirectTo },
+  });
+  const inviteUrl = link.data?.properties?.action_link ?? redirectTo;
+  const tpl = renderVolunteerInvite({ firstName: v.first_name, inviteUrl });
+  await createNotificationService().sendEmail({
+    to: v.email,
+    subject: tpl.subject,
+    html: tpl.html,
+    text: tpl.text,
+  });
+  revalidatePath(`/admin/volunteers/${id}`);
 }
