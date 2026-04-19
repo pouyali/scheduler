@@ -65,6 +65,7 @@ export type Database = {
         Row: {
           channel: Database["public"]["Enums"]["notification_channel"]
           delivered_at: string | null
+          event_type: Database["public"]["Enums"]["notification_event_type"]
           id: string
           request_id: string
           sent_at: string
@@ -75,6 +76,7 @@ export type Database = {
         Insert: {
           channel: Database["public"]["Enums"]["notification_channel"]
           delivered_at?: string | null
+          event_type?: Database["public"]["Enums"]["notification_event_type"]
           id?: string
           request_id: string
           sent_at?: string
@@ -85,6 +87,7 @@ export type Database = {
         Update: {
           channel?: Database["public"]["Enums"]["notification_channel"]
           delivered_at?: string | null
+          event_type?: Database["public"]["Enums"]["notification_event_type"]
           id?: string
           request_id?: string
           sent_at?: string
@@ -231,6 +234,8 @@ export type Database = {
       service_requests: {
         Row: {
           assigned_volunteer_id: string | null
+          cancelled_at: string | null
+          cancelled_reason: string | null
           category: string
           completed_at: string | null
           created_at: string
@@ -238,6 +243,7 @@ export type Database = {
           description: string | null
           id: string
           priority: Database["public"]["Enums"]["request_priority"]
+          reopened_at: string | null
           requested_date: string
           senior_id: string
           status: Database["public"]["Enums"]["request_status"]
@@ -245,6 +251,8 @@ export type Database = {
         }
         Insert: {
           assigned_volunteer_id?: string | null
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
           category: string
           completed_at?: string | null
           created_at?: string
@@ -252,6 +260,7 @@ export type Database = {
           description?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["request_priority"]
+          reopened_at?: string | null
           requested_date: string
           senior_id: string
           status?: Database["public"]["Enums"]["request_status"]
@@ -259,6 +268,8 @@ export type Database = {
         }
         Update: {
           assigned_volunteer_id?: string | null
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
           category?: string
           completed_at?: string | null
           created_at?: string
@@ -266,6 +277,7 @@ export type Database = {
           description?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["request_priority"]
+          reopened_at?: string | null
           requested_date?: string
           senior_id?: string
           status?: Database["public"]["Enums"]["request_status"]
@@ -464,6 +476,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_response_token: {
+        Args: { p_action: string; p_token: string }
+        Returns: Json
+      }
       delete_senior_cascade: {
         Args: { p_senior_id: string }
         Returns: undefined
@@ -487,6 +503,7 @@ export type Database = {
     Enums: {
       auth_provider: "email" | "google" | "admin_invite"
       notification_channel: "email" | "sms" | "push"
+      notification_event_type: "invite" | "cancellation" | "reassignment_invite"
       notification_status: "sent" | "failed" | "bounced"
       request_priority: "low" | "normal" | "high"
       request_status:
@@ -629,6 +646,11 @@ export const Constants = {
     Enums: {
       auth_provider: ["email", "google", "admin_invite"],
       notification_channel: ["email", "sms", "push"],
+      notification_event_type: [
+        "invite",
+        "cancellation",
+        "reassignment_invite",
+      ],
       notification_status: ["sent", "failed", "bounced"],
       request_priority: ["low", "normal", "high"],
       request_status: [
