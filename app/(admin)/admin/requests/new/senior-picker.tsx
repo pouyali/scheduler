@@ -10,13 +10,14 @@ export function SeniorPicker({ onSelect }: { onSelect?: (s: Senior) => void }) {
   const [selected, setSelected] = useState<Senior | null>(null);
 
   useEffect(() => {
-    if (q.trim().length < 2) {
-      setResults([]);
-      return;
-    }
+    const query = q.trim();
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/seniors/search?q=${encodeURIComponent(q)}`, {
+      if (query.length < 2) {
+        setResults([]);
+        return;
+      }
+      const res = await fetch(`/api/seniors/search?q=${encodeURIComponent(query)}`, {
         signal: ctrl.signal,
       });
       if (!res.ok) return;

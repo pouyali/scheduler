@@ -59,9 +59,10 @@ export async function listServiceRequests(
   const { data, error } = await q;
   if (error) throw error;
 
-  // When we inner-joined seniors for search, strip the join data back out to match Row type.
-  const raw = data as unknown as (Row & { seniors?: unknown })[];
-  const rowsData: Row[] = raw.map(({ seniors: _s, ...rest }) => rest as Row);
+  // When we inner-joined seniors for search, the returned rows carry a `seniors`
+  // field we don't need. Cast through unknown to the Row type; the extra field
+  // is harmless to consumers and avoids an object spread on every row.
+  const rowsData = data as unknown as Row[];
 
   const hasMore = rowsData.length > limit;
   const rows = hasMore ? rowsData.slice(0, limit) : rowsData;

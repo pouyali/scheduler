@@ -26,11 +26,11 @@ test("admin broadcasts, first volunteer to accept wins, sibling is superseded", 
   // Seed a senior. `created_by` must be the dev admin's id — look it up.
   const { data: admins } = await svc.from("admins").select("id").limit(1);
   const adminId = admins![0].id;
-  const { data: senior } = await svc.from("seniors").insert({
+  await svc.from("seniors").insert({
     first_name: "E2E", last_name: "Senior", phone: "416-555-0001",
     address_line1: "1 Main St", city: "Toronto", province: "ON", postal_code: "M1A1A1",
     created_by: adminId,
-  }).select().single();
+  });
 
   // Log in as admin and create the request.
   await page.goto("/login");

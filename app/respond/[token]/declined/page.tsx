@@ -5,7 +5,7 @@ export default function DeclinedPage() {
     <main className="mx-auto max-w-md p-8 text-center">
       <h1 className="text-2xl font-semibold">Thanks for letting us know</h1>
       <p className="mt-4 text-gray-600">
-        We'll look for someone else. We appreciate you responding.
+        We&apos;ll look for someone else. We appreciate you responding.
       </p>
       <Link href="/volunteer/dashboard" className="mt-6 inline-block text-blue-600 underline">
         Open your dashboard
