@@ -60,15 +60,8 @@ describe("GET /respond/[token]", () => {
     expect(res.headers.get("location")).toMatch(/\/invalid$/);
   });
 
-  test("second accept (request already accepted) → already-filled", async () => {
+  test("valid accept against already-accepted request → already-filled", async () => {
     const { token } = await seedTokenFor("accept", "accepted");
-    // Fake: mark assignee so the RPC check fires.
-    const admin = adminClient();
-    const tok = await admin.from("response_tokens").select("request_id, volunteer_id").eq("token", token).single();
-    await admin.from("service_requests").update({
-      status: "accepted", assigned_volunteer_id: tok.data!.volunteer_id,
-    }).eq("id", tok.data!.request_id);
-
     const res = await GET(reqFor(token, "accept"), { params: Promise.resolve({ token }) });
     expect(res.headers.get("location")).toMatch(/\/already-filled$/);
   });

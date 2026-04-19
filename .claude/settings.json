@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npx shadcn@latest:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run test)",
+      "Bash(npm test)",
+      "Bash(npm run test:integration)",
+      "Bash(npm run test:integration -- *)",
+      "Bash(npm run test:e2e)",
+      "Bash(npm run test:e2e -- *)",
+      "Bash(npm run format)",
+      "Bash(npm run format:check)",
+      "Bash(npm run build)",
+      "Bash(npm run supabase:start)",
+      "Bash(npm run supabase:stop)",
+      "Bash(npm run supabase:reset)",
+      "Bash(npm run supabase:types)",
+      "Bash(npm run seed:admin)",
+      "Bash(npx vitest run:*)"
+    ]
+  }
+}

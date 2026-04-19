@@ -8,41 +8,54 @@ export async function GET(
   ctx: { params: Promise<Params> },
 ): Promise<Response> {
   const { token } = await ctx.params;
-  const url = new URL(request.url);
-  const action = url.searchParams.get("action");
-
-  if (action !== "accept" && action !== "decline") {
-    return redirect(url, token, "invalid");
+  let url: URL;
+  try {
+    url = new URL(request.url);
+  } catch {
+    // Malformed request URL — fall back to a relative redirect.
+    return NextResponse.redirect(`/respond/${encodeURIComponent(token)}/invalid`, 303);
   }
 
-  const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase.rpc("consume_response_token", {
-    p_token: token,
-    p_action: action,
-  });
-
-  if (error) {
-    const code = (error as { code?: string }).code;
-    if (code === "40P01" || code === "55P03") {
-      return redirect(url, token, "already-filled");
-    }
-    console.error("consume_response_token error", error);
-    return redirect(url, token, "invalid");
-  }
-
-  const outcome = (data as { outcome: string } | null)?.outcome ?? "invalid";
-
-  switch (outcome) {
-    case "accepted":
-      return redirect(url, token, "accepted");
-    case "declined":
-      return redirect(url, token, "declined");
-    case "already_filled":
-      return redirect(url, token, "already-filled");
-    case "expired":
-    case "invalid":
-    default:
+  try {
+    const action = url.searchParams.get("action");
+    if (action !== "accept" && action !== "decline") {
       return redirect(url, token, "invalid");
+    }
+
+    const supabase = createSupabaseAdminClient();
+    const { data, error } = await supabase.rpc("consume_response_token", {
+      p_token: token,
+      p_action: action,
+    });
+
+    if (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "40P01" || code === "55P03") {
+        return redirect(url, token, "already-filled");
+      }
+      console.error("consume_response_token error", error);
+      return redirect(url, token, "invalid");
+    }
+
+    // See RPC: consume_response_token returns jsonb {outcome, request_id?}.
+    // We only need `outcome` here; cast narrows just enough to dispatch.
+    const outcome = (data as { outcome: string } | null)?.outcome ?? "invalid";
+
+    switch (outcome) {
+      case "accepted":
+        return redirect(url, token, "accepted");
+      case "declined":
+        return redirect(url, token, "declined");
+      case "already_filled":
+        return redirect(url, token, "already-filled");
+      case "expired":
+      case "invalid":
+      default:
+        return redirect(url, token, "invalid");
+    }
+  } catch (err) {
+    console.error("respond route unexpected error", err);
+    return redirect(url, token, "invalid");
   }
 }
 
