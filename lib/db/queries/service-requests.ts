@@ -354,6 +354,53 @@ export type DashboardActivityEvent = {
   requestId: string;
 };
 
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  resource: {
+    status: Status;
+    category: string;
+    assigneeId: string | null;
+    requestId: string;
+  };
+};
+
+export async function listCalendarEvents(
+  supabase: Client,
+  range: { from: string; to: string },
+): Promise<CalendarEvent[]> {
+  const { data, error } = await supabase
+    .from("service_requests")
+    .select(`
+      id, category, requested_at, status, assigned_volunteer_id,
+      seniors:seniors!inner(first_name)
+    `)
+    .gte("requested_at", range.from)
+    .lte("requested_at", range.to)
+    .order("requested_at", { ascending: true });
+  if (error) throw error;
+
+  return (data ?? []).map((r) => {
+    const s = (r as unknown as { seniors: { first_name: string } }).seniors;
+    const start = new Date(r.requested_at);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    return {
+      id: r.id,
+      title: `${s.first_name} · ${r.category}`,
+      start,
+      end,
+      resource: {
+        status: r.status,
+        category: r.category,
+        assigneeId: r.assigned_volunteer_id,
+        requestId: r.id,
+      },
+    };
+  });
+}
+
 export async function listRecentActivity(
   supabase: Client,
   limit: number = 20,
