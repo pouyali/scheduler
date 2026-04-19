@@ -256,3 +256,28 @@ export async function countPendingInvitesForVolunteer(
   if (error) throw error;
   return count ?? 0;
 }
+
+export async function getNotificationCountsByRequest(
+  supabase: Client, requestIds: string[],
+): Promise<Map<string, { sent: number; accepted: number }>> {
+  if (requestIds.length === 0) return new Map();
+  const { data: notifs } = await supabase
+    .from("notifications")
+    .select("request_id")
+    .in("request_id", requestIds);
+  const { data: toks } = await supabase
+    .from("response_tokens")
+    .select("request_id, action")
+    .in("request_id", requestIds);
+
+  const result = new Map<string, { sent: number; accepted: number }>();
+  for (const id of requestIds) result.set(id, { sent: 0, accepted: 0 });
+  for (const n of notifs ?? []) {
+    const cur = result.get(n.request_id)!;
+    cur.sent += 1;
+  }
+  for (const t of toks ?? []) {
+    if (t.action === "accept") result.get(t.request_id)!.accepted += 1;
+  }
+  return result;
+}

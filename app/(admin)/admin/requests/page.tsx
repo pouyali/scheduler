@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { listServiceRequests } from "@/lib/db/queries/service-requests";
+import { listServiceRequests, getNotificationCountsByRequest } from "@/lib/db/queries/service-requests";
 import { RequestsFilters } from "./requests-filters";
 
 type Search = { status?: string; dateFrom?: string; dateTo?: string };
@@ -28,6 +28,7 @@ export default async function AdminRequestsPage({
     dateTo: sp.dateTo,
     limit: 100,
   });
+  const counts = await getNotificationCountsByRequest(supabase, rows.map(r => r.id));
 
   return (
     <section className="space-y-4">
@@ -61,6 +62,11 @@ export default async function AdminRequestsPage({
               <td>{r.priority}</td>
               <td>
                 <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{r.status}</span>
+                {(r.status === "notified" || r.status === "accepted") && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    sent {counts.get(r.id)?.sent ?? 0} · accepted {counts.get(r.id)?.accepted ?? 0}
+                  </span>
+                )}
               </td>
               <td className="text-right">
                 <Link href={`/admin/requests/${r.id}`} className="text-blue-600 underline">
