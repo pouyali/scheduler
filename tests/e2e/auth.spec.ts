@@ -20,7 +20,7 @@ test("volunteer signup → admin approve → login", async ({ page }) => {
   await page.getByLabel("First name").fill("E2E");
   await page.getByLabel("Last name").fill("User");
   await page.getByLabel("Service area (city)").fill("Toronto");
-  await page.getByLabel(/Categories/).fill("transportation");
+  await page.getByRole("checkbox", { name: /transportation/i }).check();
   await page.getByRole("button", { name: /save and continue/i }).click();
 
   await page.waitForURL(/volunteer\/dashboard/);
