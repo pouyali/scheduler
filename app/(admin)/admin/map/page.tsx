@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listSeniors } from "@/lib/db/queries/seniors";
 import { MapView, type MapPin } from "@/components/map/MapView";
+import { Button } from "@/components/ui/button";
 
 type SearchParams = Promise<{ city?: string }>;
 
@@ -31,7 +32,7 @@ export default async function AdminMapPage({ searchParams }: { searchParams: Sea
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Seniors map</h2>
+        <h2 className="text-h2">Seniors map</h2>
         {missing > 0 ? (
           <Link
             href="/admin/seniors?not_geocoded=true"
@@ -41,26 +42,17 @@ export default async function AdminMapPage({ searchParams }: { searchParams: Sea
           </Link>
         ) : null}
       </div>
-      <form action="/admin/map" className="flex items-end gap-2">
-        <label className="text-sm">
-          City
-          <select
-            name="city"
-            defaultValue={sp.city ?? ""}
-            className="ml-2 h-9 rounded-md border px-2 text-sm"
-          >
-            <option value="">All</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="h-9 rounded-md border px-3 text-sm" type="submit">
-          Apply
-        </button>
-      </form>
+      <div className="flex flex-wrap items-center gap-2 border border-border rounded-[var(--radius-lg)] bg-card p-3">
+        <span className="text-sm text-muted-foreground">City</span>
+        <Button asChild variant="pill" size="sm">
+          <Link href="/admin/map">All</Link>
+        </Button>
+        {cities.map((c) => (
+          <Button key={c} asChild variant="pill" size="sm">
+            <Link href={`/admin/map?city=${encodeURIComponent(c)}`}>{c}</Link>
+          </Button>
+        ))}
+      </div>
       <MapView pins={pins} cluster className="h-[70vh] w-full rounded-md border" />
     </div>
   );
