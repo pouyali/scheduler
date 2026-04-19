@@ -8,7 +8,7 @@ create table public.volunteer_categories (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-create index volunteer_categories_archived_idx on public.volunteer_categories (archived_at);
+create index volunteer_categories_archived_idx on public.volunteer_categories (archived_at) where archived_at is null;
 
 alter table public.volunteer_categories enable row level security;
 
