@@ -1,4 +1,5 @@
 import type { RecipientRow } from "@/lib/db/queries/service-requests";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { RetryButton } from "./retry-button";
 
 export function RecipientsTable({ rows }: { rows: RecipientRow[] }) {
@@ -14,14 +15,14 @@ export function RecipientsTable({ rows }: { rows: RecipientRow[] }) {
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-semibold">Recipients</h2>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         Sent to {summary.total} · {summary.accepted} accepted · {summary.declined} declined · {summary.pending} pending
         {summary.superseded > 0 && ` · ${summary.superseded} superseded`}
         {summary.failed > 0 && ` · ${summary.failed} failed`}
       </p>
-      <table className="w-full text-sm">
-        <thead className="text-left text-gray-500">
-          <tr><th>Volunteer</th><th>Sent</th><th>State</th><th>Response</th><th></th></tr>
+      <table className="w-full border-collapse text-sm">
+        <thead className="text-left text-xs uppercase text-muted-foreground">
+          <tr className="border-b border-border"><th className="py-2">Volunteer</th><th>Sent</th><th>State</th><th>Response</th><th></th></tr>
         </thead>
         <tbody>
           {rows.map(r => {
@@ -32,11 +33,11 @@ export function RecipientsTable({ rows }: { rows: RecipientRow[] }) {
               r.notification_status === "failed" ? "failed" :
               "pending";
             return (
-              <tr key={r.notification_id} className="border-t">
+              <tr key={r.notification_id} className="border-t hover:bg-muted">
                 <td className="py-2">{r.volunteer_first_name} {r.volunteer_last_name}</td>
                 <td>{new Date(r.sent_at).toLocaleString("en-CA")}</td>
                 <td>
-                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs uppercase">{state}</span>
+                  <StatusBadge variant={state as "accepted" | "declined" | "superseded" | "failed" | "pending"}>{state}</StatusBadge>
                 </td>
                 <td>{r.token_used_at ? new Date(r.token_used_at).toLocaleString("en-CA") : "—"}</td>
                 <td>{state === "failed" && <RetryButton notificationId={r.notification_id} />}</td>

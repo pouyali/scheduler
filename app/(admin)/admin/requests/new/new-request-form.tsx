@@ -3,6 +3,10 @@
 import { useState, useTransition } from "react";
 import { SeniorPicker } from "./senior-picker";
 import { createRequestAction, type CreateResult } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export function NewRequestForm({ categories }: { categories: { slug: string; name: string }[] }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -23,17 +27,21 @@ export function NewRequestForm({ categories }: { categories: { slug: string; nam
 
   return (
     <form action={onSubmit} className="space-y-4">
-      <label className="block">
-        <span className="text-sm font-medium">Senior</span>
+      <div className="space-y-1.5">
+        <Label>Senior</Label>
         <SeniorPicker />
         {errors.senior_id && (
-          <p className="text-sm text-red-600">{errors.senior_id}</p>
+          <p className="text-sm italic text-muted-foreground">{errors.senior_id}</p>
         )}
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="text-sm font-medium">Category</span>
-        <select name="category" className="w-full rounded border px-3 py-2">
+      <div className="space-y-1.5">
+        <Label htmlFor="category">Category</Label>
+        <select
+          id="category"
+          name="category"
+          className="flex h-9 w-full rounded-[var(--radius)] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:shadow-[var(--shadow-focus)]"
+        >
           {categories.map((c) => (
             <option key={c.slug} value={c.slug}>
               {c.name}
@@ -41,52 +49,50 @@ export function NewRequestForm({ categories }: { categories: { slug: string; nam
           ))}
         </select>
         {errors.category && (
-          <p className="text-sm text-red-600">{errors.category}</p>
+          <p className="text-sm italic text-muted-foreground">{errors.category}</p>
         )}
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="text-sm font-medium">Priority</span>
+      <div className="space-y-1.5">
+        <Label htmlFor="priority">Priority</Label>
         <select
+          id="priority"
           name="priority"
           defaultValue="normal"
-          className="w-full rounded border px-3 py-2"
+          className="flex h-9 w-full rounded-[var(--radius)] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:shadow-[var(--shadow-focus)]"
         >
           <option value="low">Low</option>
           <option value="normal">Normal</option>
           <option value="high">High</option>
         </select>
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="text-sm font-medium">Requested date</span>
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="requested_date">Requested date</Label>
+        <Input
+          id="requested_date"
           type="date"
           name="requested_date"
-          className="w-full rounded border px-3 py-2"
         />
         {errors.requested_date && (
-          <p className="text-sm text-red-600">{errors.requested_date}</p>
+          <p className="text-sm italic text-muted-foreground">{errors.requested_date}</p>
         )}
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="text-sm font-medium">Description</span>
-        <textarea
+      <div className="space-y-1.5">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
           name="description"
           rows={4}
-          className="w-full rounded border px-3 py-2"
         />
-      </label>
+      </div>
 
-      {formError && <p className="text-sm text-red-600">{formError}</p>}
+      {formError && <p className="text-sm italic text-muted-foreground">{formError}</p>}
 
-      <button
-        disabled={pending}
-        className="rounded bg-black px-4 py-2 text-sm font-medium text-white"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Creating…" : "Create request"}
-      </button>
+      </Button>
     </form>
   );
 }

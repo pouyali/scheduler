@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listServiceRequests, getNotificationCountsByRequest } from "@/lib/db/queries/service-requests";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { RequestsFilters } from "./requests-filters";
 
 type Search = { status?: string; dateFrom?: string; dateTo?: string };
@@ -31,22 +33,19 @@ export default async function AdminRequestsPage({
   const counts = await getNotificationCountsByRequest(supabase, rows.map(r => r.id));
 
   return (
-    <section className="space-y-4">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Service requests</h1>
-        <Link
-          href="/admin/requests/new"
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
-        >
-          New request
-        </Link>
-      </header>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-h2">Service requests</h2>
+        <Button asChild>
+          <Link href="/admin/requests/new">New request</Link>
+        </Button>
+      </div>
 
       <RequestsFilters currentStatus={status} />
 
-      <table className="w-full text-sm">
-        <thead className="text-left text-gray-500">
-          <tr>
+      <table className="w-full border-collapse text-sm">
+        <thead className="text-left text-xs uppercase text-muted-foreground">
+          <tr className="border-b border-border">
             <th className="py-2">Date</th>
             <th>Category</th>
             <th>Priority</th>
@@ -56,20 +55,22 @@ export default async function AdminRequestsPage({
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t">
+            <tr key={r.id} className="border-t hover:bg-muted">
               <td className="py-2">{r.requested_date}</td>
               <td>{r.category}</td>
-              <td>{r.priority}</td>
               <td>
-                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{r.status}</span>
+                <StatusBadge variant={r.priority as "low" | "normal" | "high"}>{r.priority}</StatusBadge>
+              </td>
+              <td>
+                <StatusBadge variant={r.status as "open" | "notified" | "accepted" | "completed" | "cancelled"}>{r.status}</StatusBadge>
                 {(r.status === "notified" || r.status === "accepted") && (
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="ml-2 text-xs text-muted-foreground">
                     sent {counts.get(r.id)?.sent ?? 0} · accepted {counts.get(r.id)?.accepted ?? 0}
                   </span>
                 )}
               </td>
               <td className="text-right">
-                <Link href={`/admin/requests/${r.id}`} className="text-blue-600 underline">
+                <Link href={`/admin/requests/${r.id}`} className="underline underline-offset-2">
                   Open
                 </Link>
               </td>
@@ -77,13 +78,13 @@ export default async function AdminRequestsPage({
           ))}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-6 text-center text-gray-500">
+              <td colSpan={5} className="py-6 text-center text-muted-foreground">
                 No requests match these filters.
               </td>
             </tr>
           )}
         </tbody>
       </table>
-    </section>
+    </div>
   );
 }

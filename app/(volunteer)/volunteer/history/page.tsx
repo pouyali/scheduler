@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireActiveVolunteer } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default async function VolunteerHistoryPage() {
   const user = await requireActiveVolunteer();
@@ -20,29 +21,40 @@ export default async function VolunteerHistoryPage() {
     .limit(200);
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">History</h1>
-      <table className="w-full text-sm">
-        <thead className="text-left text-gray-500">
-          <tr><th>Date</th><th>Senior</th><th>Category</th><th>Status</th></tr>
+    <div className="space-y-6">
+      <h2 className="text-h2">History</h2>
+      <table className="w-full border-collapse text-sm">
+        <thead className="text-left text-xs uppercase text-muted-foreground">
+          <tr className="border-b border-border">
+            <th className="py-2">Date</th>
+            <th>Senior</th>
+            <th>Category</th>
+            <th>Status</th>
+          </tr>
         </thead>
         <tbody>
           {(rows ?? []).map((r) => {
             const s = (r as unknown as { seniors: { first_name: string; last_name: string } }).seniors;
             return (
-              <tr key={r.id} className="border-t">
+              <tr key={r.id} className="border-t hover:bg-muted">
                 <td className="py-2">{r.requested_date}</td>
-                <td><Link href={`/volunteer/requests/${r.id}`} className="text-blue-600 underline">{s.first_name} {s.last_name}</Link></td>
+                <td>
+                  <Link href={`/volunteer/requests/${r.id}`} className="underline underline-offset-2">
+                    {s.first_name} {s.last_name}
+                  </Link>
+                </td>
                 <td>{r.category}</td>
-                <td>{r.status}</td>
+                <td>
+                  <StatusBadge variant={r.status as "accepted" | "completed"}>{r.status}</StatusBadge>
+                </td>
               </tr>
             );
           })}
           {(rows ?? []).length === 0 && (
-            <tr><td colSpan={4} className="py-6 text-center text-gray-500">No past assignments yet.</td></tr>
+            <tr><td colSpan={4} className="py-6 text-center text-muted-foreground">No past assignments yet.</td></tr>
           )}
         </tbody>
       </table>
-    </section>
+    </div>
   );
 }

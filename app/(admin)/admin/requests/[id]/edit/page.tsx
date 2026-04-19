@@ -15,8 +15,8 @@ export default async function EditRequestPage({
   const { data: cats } = await supabase.from("volunteer_categories").select("slug, name").is("archived_at", null).order("name");
 
   return (
-    <section className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-2xl font-semibold">Edit request</h1>
+    <div className="mx-auto max-w-xl space-y-6">
+      <h2 className="text-h2">Edit request</h2>
       <EditForm
         requestId={request.id}
         locked={request.status === "notified"}
@@ -28,6 +28,6 @@ export default async function EditRequestPage({
         }}
         categories={cats ?? []}
       />
-    </section>
+    </div>
   );
 }

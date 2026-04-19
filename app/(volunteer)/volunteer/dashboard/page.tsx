@@ -86,7 +86,7 @@ export default async function VolunteerDashboardPage() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Pending invites</h2>
         {inviteCards.length === 0 ? (
-          <p className="text-gray-600">No pending invites right now.</p>
+          <p className="text-sm italic text-muted-foreground">No pending invites right now.</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {inviteCards.map((i) => <InviteCard key={i.requestId} invite={i} />)}
@@ -97,17 +97,17 @@ export default async function VolunteerDashboardPage() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Upcoming accepted</h2>
         {(upcoming ?? []).length === 0 ? (
-          <p className="text-gray-600">Nothing scheduled yet.</p>
+          <p className="text-sm italic text-muted-foreground">Nothing scheduled yet.</p>
         ) : (
           <ul className="space-y-2">
             {(upcoming ?? []).map((r) => {
               const s = (r as unknown as { seniors: { first_name: string; last_name: string; address_line1: string; city: string; phone: string } }).seniors;
               return (
-                <li key={r.id} className="rounded border p-3">
-                  <Link href={`/volunteer/requests/${r.id}`} className="font-medium">
+                <li key={r.id} className="rounded-[var(--radius-lg)] border border-border p-3">
+                  <Link href={`/volunteer/requests/${r.id}`} className="font-medium underline underline-offset-2">
                     {s.first_name} {s.last_name} — {r.category}
                   </Link>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {r.requested_date} · {s.address_line1}, {s.city} · {s.phone}
                   </p>
                 </li>

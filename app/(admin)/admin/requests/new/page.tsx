@@ -11,9 +11,9 @@ export default async function NewRequestPage() {
     .is("archived_at", null)
     .order("name");
   return (
-    <section className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-2xl font-semibold">New service request</h1>
+    <div className="mx-auto max-w-xl space-y-6">
+      <h2 className="text-h2">New service request</h2>
       <NewRequestForm categories={cats ?? []} />
-    </section>
+    </div>
   );
 }

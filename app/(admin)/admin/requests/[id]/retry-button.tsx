@@ -1,17 +1,19 @@
 "use client";
 import { useTransition } from "react";
 import { retryNotificationAction } from "./actions";
+import { Button } from "@/components/ui/button";
 
 export function RetryButton({ notificationId }: { notificationId: string }) {
   const [pending, startTransition] = useTransition();
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       disabled={pending}
       onClick={() => startTransition(() => retryNotificationAction(notificationId))}
-      className="text-blue-600 underline text-sm"
     >
       {pending ? "Retrying…" : "Retry"}
-    </button>
+    </Button>
   );
 }

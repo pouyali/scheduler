@@ -4,6 +4,22 @@ const VARIANTS = {
   archived: "border border-border text-foreground/40",
   "not-geocoded": "bg-muted text-foreground/80 italic",
   active: "bg-muted text-foreground",
+  // request statuses
+  open: "bg-muted text-foreground",
+  notified: "bg-muted text-foreground/80",
+  accepted: "bg-muted text-foreground",
+  completed: "border border-border text-foreground/60",
+  cancelled: "border border-border text-foreground/40",
+  // priority
+  high: "bg-muted text-foreground",
+  normal: "bg-muted text-foreground/70",
+  low: "border border-border text-foreground/50",
+  // recipient token states
+  superseded: "border border-border text-foreground/40",
+  declined: "border border-border text-foreground/50",
+  failed: "bg-muted text-foreground/80",
+  pending: "bg-muted text-foreground/60",
+  "in-area": "bg-muted text-foreground",
 } as const;
 
 type Variant = keyof typeof VARIANTS;

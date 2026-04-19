@@ -13,19 +13,22 @@ const TABS: { key: StatusTab; label: string }[] = [
 
 export function RequestsFilters({ currentStatus }: { currentStatus: StatusTab }) {
   return (
-    <nav className="flex gap-2 border-b">
-      {TABS.map((t) => (
-        <Link
-          key={t.key}
-          href={t.key === "all" ? "/admin/requests" : `/admin/requests?status=${t.key}`}
-          aria-current={t.key === currentStatus ? "page" : undefined}
-          className={`px-3 py-2 text-sm ${
-            t.key === currentStatus ? "border-b-2 border-black font-semibold" : "text-gray-600"
-          }`}
-        >
-          {t.label}
-        </Link>
-      ))}
+    <nav className="flex flex-wrap gap-2 border-b border-border pb-2">
+      {TABS.map((t) => {
+        const active = t.key === currentStatus;
+        return (
+          <Link
+            key={t.key}
+            href={t.key === "all" ? "/admin/requests" : `/admin/requests?status=${t.key}`}
+            aria-current={active ? "page" : undefined}
+            className={`rounded-[var(--radius)] px-3 py-1.5 text-sm ${
+              active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {t.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Senior = { id: string; first_name: string; last_name: string; city: string };
 
@@ -31,20 +33,21 @@ export function SeniorPicker({ onSelect }: { onSelect?: (s: Senior) => void }) {
 
   if (selected) {
     return (
-      <div className="flex items-center justify-between rounded border p-3">
-        <span>
+      <div className="flex items-center justify-between rounded-[var(--radius)] border border-border px-3 py-2">
+        <span className="text-sm">
           {selected.first_name} {selected.last_name} · {selected.city}
         </span>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setSelected(null);
             setQ("");
           }}
-          className="text-blue-600 underline text-sm"
         >
           Change
-        </button>
+        </Button>
         <input type="hidden" name="senior_id" value={selected.id} />
       </div>
     );
@@ -52,15 +55,14 @@ export function SeniorPicker({ onSelect }: { onSelect?: (s: Senior) => void }) {
 
   return (
     <div>
-      <input
+      <Input
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search seniors by name or phone…"
-        className="w-full rounded border px-3 py-2"
         aria-label="Senior search"
       />
       {results.length > 0 && (
-        <ul className="mt-1 max-h-60 overflow-auto rounded border">
+        <ul className="mt-1 max-h-60 overflow-auto rounded-[var(--radius)] border border-border">
           {results.map((s) => (
             <li key={s.id}>
               <button
@@ -69,10 +71,10 @@ export function SeniorPicker({ onSelect }: { onSelect?: (s: Senior) => void }) {
                   setSelected(s);
                   onSelect?.(s);
                 }}
-                className="block w-full px-3 py-2 text-left hover:bg-gray-100"
+                className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
               >
                 {s.first_name} {s.last_name}{" "}
-                <span className="text-gray-500">· {s.city}</span>
+                <span className="text-muted-foreground">· {s.city}</span>
               </button>
             </li>
           ))}

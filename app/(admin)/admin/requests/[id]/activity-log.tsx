@@ -37,7 +37,7 @@ export function ActivityLog({ request, recipients }: { request: Request; recipie
       <ol className="space-y-1 text-sm">
         {events.map((e, i) => (
           <li key={i} className="flex gap-3">
-            <time className="w-40 text-gray-500">{new Date(e.at).toLocaleString("en-CA")}</time>
+            <time className="w-40 text-muted-foreground">{new Date(e.at).toLocaleString("en-CA")}</time>
             <span>{e.label}</span>
           </li>
         ))}

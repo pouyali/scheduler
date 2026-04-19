@@ -55,7 +55,7 @@ export default async function RequestDetailPage({
     : [];
 
   return (
-    <section className="space-y-6">
+    <div className="space-y-6">
       <DetailHeader
         request={request}
         senior={senior}
@@ -65,6 +65,6 @@ export default async function RequestDetailPage({
       {request.status === "open" && <EligiblePicker requestId={request.id} volunteers={ranked} />}
       {recipients.length > 0 && <RecipientsTable rows={recipients} />}
       <ActivityLog request={request} recipients={recipients} />
-    </section>
+    </div>
   );
 }
