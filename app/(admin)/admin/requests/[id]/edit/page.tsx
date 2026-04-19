@@ -12,7 +12,7 @@ export default async function EditRequestPage({
   const supabase = await createSupabaseServerClient();
   const request = await getServiceRequestById(supabase, id);
   if (!request) notFound();
-  const { data: cats } = await supabase.from("volunteer_categories").select("name").order("name");
+  const { data: cats } = await supabase.from("volunteer_categories").select("slug, name").is("archived_at", null).order("name");
 
   return (
     <section className="mx-auto max-w-xl space-y-4">
@@ -26,7 +26,7 @@ export default async function EditRequestPage({
           requested_date: request.requested_date,
           description: request.description,
         }}
-        categories={(cats ?? []).map(c => c.name)}
+        categories={cats ?? []}
       />
     </section>
   );

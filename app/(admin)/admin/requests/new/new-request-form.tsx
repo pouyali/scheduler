@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { SeniorPicker } from "./senior-picker";
 import { createRequestAction, type CreateResult } from "./actions";
 
-export function NewRequestForm({ categories }: { categories: string[] }) {
+export function NewRequestForm({ categories }: { categories: { slug: string; name: string }[] }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -35,8 +35,8 @@ export function NewRequestForm({ categories }: { categories: string[] }) {
         <span className="text-sm font-medium">Category</span>
         <select name="category" className="w-full rounded border px-3 py-2">
           {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c.slug} value={c.slug}>
+              {c.name}
             </option>
           ))}
         </select>

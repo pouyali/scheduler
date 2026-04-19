@@ -7,12 +7,13 @@ export default async function NewRequestPage() {
   const supabase = await createSupabaseServerClient();
   const { data: cats } = await supabase
     .from("volunteer_categories")
-    .select("name")
+    .select("slug, name")
+    .is("archived_at", null)
     .order("name");
   return (
     <section className="mx-auto max-w-xl space-y-4">
       <h1 className="text-2xl font-semibold">New service request</h1>
-      <NewRequestForm categories={(cats ?? []).map((c) => c.name)} />
+      <NewRequestForm categories={cats ?? []} />
     </section>
   );
 }

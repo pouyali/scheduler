@@ -7,7 +7,7 @@ type Props = {
   requestId: string;
   locked: boolean;
   defaults: { category: string; priority: "low" | "normal" | "high"; requested_date: string; description: string | null };
-  categories: string[];
+  categories: { slug: string; name: string }[];
 };
 
 export function EditForm({ requestId, locked, defaults, categories }: Props) {
@@ -35,7 +35,7 @@ export function EditForm({ requestId, locked, defaults, categories }: Props) {
       <label className="block">
         <span className="text-sm font-medium">Category</span>
         <select name="category" defaultValue={defaults.category} disabled={locked} className="w-full rounded border px-3 py-2 disabled:bg-gray-100">
-          {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
         </select>
       </label>
 
