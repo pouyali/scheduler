@@ -152,9 +152,18 @@ export function MapView({
           source: "seniors",
           filter: ["has", "point_count"],
           paint: {
-            "circle-color": "#0ea5e9",
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "rgba(28, 28, 28, 0.3)",
+              10,
+              "rgba(28, 28, 28, 0.5)",
+              25,
+              "rgba(28, 28, 28, 0.8)",
+            ],
             "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 25, 25],
-            "circle-opacity": 0.8,
+            "circle-stroke-color": "#eceae4",
+            "circle-stroke-width": 1,
           },
         });
         map.addLayer({
@@ -175,10 +184,10 @@ export function MapView({
         source: "seniors",
         filter: cluster ? ["!", ["has", "point_count"]] : ["all"],
         paint: {
-          "circle-color": "#2563eb",
+          "circle-color": "#1c1c1c",
           "circle-radius": 7,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#f7f4ed",
         },
       });
 

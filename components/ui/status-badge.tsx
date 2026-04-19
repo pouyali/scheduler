@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
 const VARIANTS = {
-  archived: "bg-gray-200 text-gray-800",
-  "not-geocoded": "bg-amber-100 text-amber-900",
-  active: "bg-emerald-100 text-emerald-900",
+  archived: "border border-border text-foreground/40",
+  "not-geocoded": "bg-muted text-foreground/80 italic",
+  active: "bg-muted text-foreground",
 } as const;
 
 type Variant = keyof typeof VARIANTS;
@@ -18,7 +18,7 @@ export function StatusBadge({ variant, children, className }: Props) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 rounded-[var(--radius)] px-2 py-0.5 text-xs font-normal",
         VARIANTS[variant],
         className,
       )}

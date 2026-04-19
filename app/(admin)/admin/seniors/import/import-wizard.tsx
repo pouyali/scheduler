@@ -114,7 +114,7 @@ export function ImportWizard() {
         <li className={step === "done" ? "font-semibold" : "text-muted-foreground"}>3. Result</li>
       </ol>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-muted-foreground italic">{error}</p> : null}
 
       {step === "upload" ? (
         <div className="space-y-3">
@@ -148,7 +148,7 @@ export function ImportWizard() {
           </Button>
           <table className="w-full border-collapse text-sm">
             <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr>
+              <tr className="border-b border-border">
                 <th className="py-2">Include</th>
                 <th>Row</th>
                 <th>Name</th>
@@ -161,11 +161,13 @@ export function ImportWizard() {
               {preview.rows.map((r) => {
                 const isValid = r.errors.length === 0;
                 const isGeoFail = isValid && !r.geocode;
+                const rowClass = !isValid
+                  ? "italic text-muted-foreground border-l-2 border-foreground/20"
+                  : isGeoFail
+                    ? "bg-muted"
+                    : "";
                 return (
-                  <tr
-                    key={r.rowNumber}
-                    className={isGeoFail ? "bg-amber-50" : !isValid ? "bg-red-50" : ""}
-                  >
+                  <tr key={r.rowNumber} className={rowClass}>
                     <td className="py-1">
                       <input
                         type="checkbox"

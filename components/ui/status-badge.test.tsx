@@ -7,10 +7,18 @@ describe("StatusBadge", () => {
     render(<StatusBadge variant="archived">Archived</StatusBadge>);
     expect(screen.getByText("Archived")).toBeInTheDocument();
   });
-  it("applies variant class", () => {
+  it("applies the not-geocoded variant class", () => {
     const { container } = render(
       <StatusBadge variant="not-geocoded">No location</StatusBadge>,
     );
-    expect(container.firstChild).toHaveClass("bg-amber-100");
+    expect(container.firstChild).toHaveClass("italic");
+  });
+  it("applies the archived variant class", () => {
+    const { container } = render(<StatusBadge variant="archived">Archived</StatusBadge>);
+    expect(container.firstChild).toHaveClass("border");
+  });
+  it("applies the active variant class", () => {
+    const { container } = render(<StatusBadge variant="active">Active</StatusBadge>);
+    expect(container.firstChild).toHaveClass("bg-muted");
   });
 });

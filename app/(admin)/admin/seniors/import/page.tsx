@@ -10,7 +10,7 @@ export default async function ImportPage() {
         <Link href="/admin/seniors" className="text-sm underline">
           ← Back to seniors
         </Link>
-        <h2 className="mt-2 text-xl font-semibold">Import seniors from CSV</h2>
+        <h2 className="mt-2 text-h2">Import seniors from CSV</h2>
       </div>
       <ImportWizard />
     </div>

@@ -29,8 +29,8 @@ export function DangerZone({ id, fullName, archived }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="mt-10 rounded-md border border-red-200 p-4">
-      <h3 className="text-sm font-semibold text-red-700">Danger zone</h3>
+    <div className="mt-10 rounded-[var(--radius-lg)] border border-border p-4">
+      <h3 className="text-sm font-semibold text-foreground">Danger zone</h3>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {archived ? (
           <>
@@ -43,7 +43,7 @@ export function DangerZone({ id, fullName, archived }: Props) {
             </Button>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="destructive">Permanently delete</Button>
+                <Button>Permanently delete</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogTitle>Permanently delete {fullName}?</DialogTitle>
@@ -57,13 +57,14 @@ export function DangerZone({ id, fullName, archived }: Props) {
                   value={typed}
                   onChange={(e) => setTyped(e.target.value)}
                 />
-                {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+                {error ? (
+                  <p className="mt-2 text-sm italic text-muted-foreground">{error}</p>
+                ) : null}
                 <div className="mt-4 flex justify-end gap-2">
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
                   <Button
-                    variant="destructive"
                     disabled={isPending || typed !== fullName}
                     onClick={() =>
                       startTransition(async () => {
