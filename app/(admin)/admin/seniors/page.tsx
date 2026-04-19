@@ -109,7 +109,7 @@ export default async function SeniorsListPage({
                   <td>{r.phone}</td>
                   <td>{r.city}</td>
                   <td>{c?.openRequests ?? 0}</td>
-                  <td>{c?.lastRequestDate ?? "—"}</td>
+                  <td>{c?.lastRequestAt ?? "—"}</td>
                   <td className="space-x-1">
                     {r.archived_at ? <StatusBadge variant="archived">Archived</StatusBadge> : null}
                     {r.lat === null ? (

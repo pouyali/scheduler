@@ -99,6 +99,20 @@
   }
 }
 
+@import "react-big-calendar/lib/css/react-big-calendar.css";
+
+/* Calendar event colors — keyed off request status.
+   No --status-* CSS vars exist in this project; StatusBadge uses Tailwind utilities.
+   Using explicit hex tokens from the design palette for five visually distinct states. */
+.rbc-event.rbc-event--open        { background-color: #4f85c8; } /* blue — needs action */
+.rbc-event.rbc-event--notified    { background-color: #e8a838; } /* amber — awaiting response */
+.rbc-event.rbc-event--accepted    { background-color: #5aab6b; } /* green — confirmed */
+.rbc-event.rbc-event--completed   { background-color: #8a8a88; } /* grey / muted — done */
+.rbc-event.rbc-event--cancelled   {
+  background-color: #c95b5b;                                       /* red — cancelled */
+  text-decoration: line-through;
+}
+
 @layer utilities {
   .text-display {
     font-size: 60px;

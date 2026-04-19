@@ -110,7 +110,7 @@ export async function setArchived(
   if (error) throw error;
 }
 
-export type SeniorCounts = { openRequests: number; lastRequestDate: string | null };
+export type SeniorCounts = { openRequests: number; lastRequestAt: string | null };
 
 export async function countsBySenior(
   supabase: Client,
@@ -122,16 +122,16 @@ export async function countsBySenior(
   // Anything above that would indicate a schema/operational change that should be revisited.
   const { data, error } = await supabase
     .from("service_requests")
-    .select("senior_id, status, requested_date")
+    .select("senior_id, status, requested_at")
     .in("senior_id", seniorIds)
     .limit(5000);
   if (error) throw error;
-  for (const id of seniorIds) out.set(id, { openRequests: 0, lastRequestDate: null });
+  for (const id of seniorIds) out.set(id, { openRequests: 0, lastRequestAt: null });
   for (const r of data ?? []) {
     const entry = out.get(r.senior_id)!;
     if (["open", "notified", "accepted"].includes(r.status as string)) entry.openRequests += 1;
-    if (!entry.lastRequestDate || r.requested_date > entry.lastRequestDate) {
-      entry.lastRequestDate = r.requested_date;
+    if (!entry.lastRequestAt || r.requested_at > entry.lastRequestAt) {
+      entry.lastRequestAt = r.requested_at;
     }
   }
   return out;

@@ -4,16 +4,21 @@ export type RequestCancelledInput = {
   to: string;
   volunteerFirstName: string;
   category: string;
-  requestedDate: string;
+  requestedAt: string; // ISO timestamp
   reason?: string;
   dashboardUrl: string;
 };
 
 export function renderRequestCancelled(input: RequestCancelledInput): Email {
-  const prettyDate = new Date(`${input.requestedDate}T12:00:00-04:00`).toLocaleDateString(
-    "en-CA",
-    { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "America/Toronto" },
-  );
+  const prettyDate = new Date(input.requestedAt).toLocaleString("en-CA", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Toronto",
+  });
 
   const subject = `A request you were invited to is no longer needed`;
 

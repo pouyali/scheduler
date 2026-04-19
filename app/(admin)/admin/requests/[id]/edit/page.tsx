@@ -23,7 +23,7 @@ export default async function EditRequestPage({
         defaults={{
           category: request.category,
           priority: request.priority,
-          requested_date: request.requested_date,
+          requested_at: request.requested_at,
           description: request.description,
         }}
         categories={cats ?? []}

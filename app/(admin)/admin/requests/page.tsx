@@ -56,7 +56,11 @@ export default async function AdminRequestsPage({
         <tbody>
           {rows.map((r) => (
             <tr key={r.id} className="border-t hover:bg-muted">
-              <td className="py-2">{r.requested_date}</td>
+              <td className="py-2">{new Date(r.requested_at).toLocaleString("en-CA", {
+                timeZone: "America/Toronto",
+                year: "numeric", month: "short", day: "numeric",
+                hour: "2-digit", minute: "2-digit",
+              })}</td>
               <td>{r.category}</td>
               <td>
                 <StatusBadge variant={r.priority as "low" | "normal" | "high"}>{r.priority}</StatusBadge>

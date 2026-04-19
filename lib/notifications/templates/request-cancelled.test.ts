@@ -7,7 +7,7 @@ describe("renderRequestCancelled", () => {
       to: "v@test.local",
       volunteerFirstName: "Alice",
       category: "transportation",
-      requestedDate: "2026-05-20",
+      requestedAt: "2026-05-20T17:00:00.000Z",
       reason: "Family cancelled.",
       dashboardUrl: "https://example.test/volunteer/dashboard",
     });
@@ -23,7 +23,7 @@ describe("renderRequestCancelled", () => {
       to: "v@test.local",
       volunteerFirstName: "Alice",
       category: "transportation",
-      requestedDate: "2026-05-20",
+      requestedAt: "2026-05-20T17:00:00.000Z",
       dashboardUrl: "https://example.test/volunteer/dashboard",
     });
     expect(email.html).not.toContain("Reason:");

@@ -19,7 +19,18 @@ describe("volunteers CRUD / transitions", () => {
   let adminId: string;
 
   beforeEach(async () => {
-    await truncate(admin, ["volunteers", "admins"]);
+    // Order matters: clear all rows that reference volunteers or admins before
+    // wiping either. response_tokens + notifications + service_requests reference
+    // volunteers; seniors reference admins via created_by. Leftover data from
+    // earlier tests in the same suite run can trip FK + check constraints.
+    await truncate(admin, [
+      "response_tokens",
+      "notifications",
+      "service_requests",
+      "seniors",
+      "volunteers",
+      "admins",
+    ]);
     const a = await createAdminUser(uniqueEmail("admin"));
     adminId = a.userId;
   });

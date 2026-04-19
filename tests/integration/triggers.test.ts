@@ -61,7 +61,7 @@ describe("DB triggers", () => {
       .insert({
         senior_id: senior!.id,
         category: "transportation",
-        requested_date: "2026-05-10",
+        requested_at: "2026-05-10T17:00:00.000Z",
         created_by: admin.userId,
       })
       .select()

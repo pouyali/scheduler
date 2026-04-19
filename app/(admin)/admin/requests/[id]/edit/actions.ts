@@ -13,7 +13,7 @@ const Schema = z.object({
   senior_id: z.string().uuid().optional(),
   category: z.string().min(1).optional(),
   priority: z.enum(["low", "normal", "high"]).optional(),
-  requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  requested_at: z.string().min(1).optional(),
   description: z.string().max(2000).nullable().optional(),
 });
 

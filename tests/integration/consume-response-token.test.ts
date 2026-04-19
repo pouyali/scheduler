@@ -31,7 +31,7 @@ async function seedRequest(opts: {
     senior_id: senior.id,
     category: opts.category ?? "transportation",
     priority: "normal",
-    requested_date: requestedDate.toISOString().slice(0, 10),
+    requested_at: requestedDate.toISOString(),
     description: "Test request",
     created_by: a.userId,
     status: "notified",

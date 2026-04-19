@@ -11,7 +11,7 @@ export type ListFilters = {
   q?: string;
   dateFrom?: string;
   dateTo?: string;
-  cursor?: { requested_date: string; id: string } | null;
+  cursor?: { requested_at: string; id: string } | null;
   limit?: number;
 };
 
@@ -25,7 +25,7 @@ export async function getServiceRequestById(supabase: Client, id: string): Promi
 export async function listServiceRequests(
   supabase: Client,
   filters: ListFilters = {},
-): Promise<{ rows: Row[]; nextCursor: { requested_date: string; id: string } | null }> {
+): Promise<{ rows: Row[]; nextCursor: { requested_at: string; id: string } | null }> {
   const limit = filters.limit ?? 50;
 
   // Base select. When `q` is provided, inner-join seniors so we can filter by name.
@@ -36,8 +36,8 @@ export async function listServiceRequests(
   let q = supabase.from("service_requests").select(selectStr);
 
   if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
-  if (filters.dateFrom) q = q.gte("requested_date", filters.dateFrom);
-  if (filters.dateTo) q = q.lte("requested_date", filters.dateTo);
+  if (filters.dateFrom) q = q.gte("requested_at", filters.dateFrom);
+  if (filters.dateTo) q = q.lte("requested_at", filters.dateTo);
 
   if (filters.q?.trim()) {
     const escaped = filters.q.trim().replace(/[%_]/g, "").replace(/"/g, '""');
@@ -46,13 +46,13 @@ export async function listServiceRequests(
   }
 
   if (filters.cursor) {
-    const d = filters.cursor.requested_date;
+    const d = filters.cursor.requested_at;
     const id = filters.cursor.id;
-    q = q.or(`requested_date.lt.${d},and(requested_date.eq.${d},id.gt.${id})`);
+    q = q.or(`requested_at.lt.${d},and(requested_at.eq.${d},id.gt.${id})`);
   }
 
   q = q
-    .order("requested_date", { ascending: false })
+    .order("requested_at", { ascending: false })
     .order("id", { ascending: true })
     .limit(limit + 1);
 
@@ -68,7 +68,7 @@ export async function listServiceRequests(
   const rows = hasMore ? rowsData.slice(0, limit) : rowsData;
   const last = rows[rows.length - 1];
   const nextCursor =
-    hasMore && last ? { requested_date: last.requested_date, id: last.id } : null;
+    hasMore && last ? { requested_at: last.requested_at, id: last.id } : null;
   return { rows, nextCursor };
 }
 
@@ -76,7 +76,7 @@ export type CreateInput = {
   senior_id: string;
   category: string;
   priority: Priority;
-  requested_date: string;
+  requested_at: string;
   description: string | null;
   created_by: string;
 };
@@ -92,14 +92,14 @@ export async function createServiceRequest(supabase: Client, input: CreateInput)
 }
 
 const LOCKED_WHEN_NOTIFIED: readonly (keyof UpdateInput)[] = [
-  "senior_id", "category", "requested_date",
+  "senior_id", "category", "requested_at",
 ];
 
 export type UpdateInput = Partial<{
   senior_id: string;
   category: string;
   priority: Priority;
-  requested_date: string;
+  requested_at: string;
   description: string | null;
 }>;
 
@@ -281,4 +281,195 @@ export async function getNotificationCountsByRequest(
     if (t.action === "accept") result.get(t.request_id)!.accepted += 1;
   }
   return result;
+}
+
+export type DashboardCounts = {
+  openRequests: number;
+  awaitingResponse: number;
+  pendingVolunteers: number;
+  activeSeniors: number;
+};
+
+export async function getDashboardCounts(supabase: Client): Promise<DashboardCounts> {
+  const [openR, notR, pendV, actS] = await Promise.all([
+    supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("status", "open"),
+    supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("status", "notified"),
+    supabase.from("volunteers").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("seniors").select("id", { count: "exact", head: true }).is("archived_at", null),
+  ]);
+  return {
+    openRequests: openR.count ?? 0,
+    awaitingResponse: notR.count ?? 0,
+    pendingVolunteers: pendV.count ?? 0,
+    activeSeniors: actS.count ?? 0,
+  };
+}
+
+export type UpcomingRow = {
+  id: string;
+  category: string;
+  requested_at: string;
+  status: Status;
+  senior_first_name: string;
+  senior_city: string;
+};
+
+export async function listUpcomingRequestsForDashboard(
+  supabase: Client,
+  opts: { days?: number; limit?: number } = {},
+): Promise<UpcomingRow[]> {
+  const days = opts.days ?? 7;
+  const limit = opts.limit ?? 10;
+  const now = new Date();
+  const until = new Date(now.getTime() + days * 24 * 3600 * 1000);
+
+  const { data, error } = await supabase
+    .from("service_requests")
+    .select(`
+      id, category, requested_at, status,
+      seniors:seniors!inner(first_name, city)
+    `)
+    .gte("requested_at", now.toISOString())
+    .lte("requested_at", until.toISOString())
+    .in("status", ["open", "notified", "accepted"])
+    .order("requested_at", { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+
+  return (data ?? []).map((r) => {
+    // Supabase JS can't narrow a join shape from a select string — same pattern used
+    // elsewhere in this module (listRecipientsForRequest).
+    const s = (r as unknown as { seniors: { first_name: string; city: string } }).seniors;
+    return {
+      id: r.id, category: r.category, requested_at: r.requested_at, status: r.status,
+      senior_first_name: s.first_name, senior_city: s.city,
+    };
+  });
+}
+
+export type DashboardActivityEvent = {
+  at: string;
+  kind: "created" | "broadcast" | "accepted" | "declined" | "cancelled" | "reopened" | "completed";
+  text: string;
+  requestId: string;
+};
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  resource: {
+    status: Status;
+    category: string;
+    assigneeId: string | null;
+    requestId: string;
+  };
+};
+
+export async function listCalendarEvents(
+  supabase: Client,
+  range: { from: string; to: string },
+): Promise<CalendarEvent[]> {
+  const { data, error } = await supabase
+    .from("service_requests")
+    .select(`
+      id, category, requested_at, status, assigned_volunteer_id,
+      seniors:seniors!inner(first_name)
+    `)
+    .gte("requested_at", range.from)
+    .lte("requested_at", range.to)
+    .order("requested_at", { ascending: true });
+  if (error) throw error;
+
+  return (data ?? []).map((r) => {
+    const s = (r as unknown as { seniors: { first_name: string } }).seniors;
+    const start = new Date(r.requested_at);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    return {
+      id: r.id,
+      title: `${s.first_name} · ${r.category}`,
+      start,
+      end,
+      resource: {
+        status: r.status,
+        category: r.category,
+        assigneeId: r.assigned_volunteer_id,
+        requestId: r.id,
+      },
+    };
+  });
+}
+
+export async function listRecentActivity(
+  supabase: Client,
+  limit: number = 20,
+): Promise<DashboardActivityEvent[]> {
+  // 1) status-transition events
+  const { data: reqs } = await supabase
+    .from("service_requests")
+    .select(`
+      id, cancelled_at, cancelled_reason, reopened_at, completed_at, created_at,
+      seniors:seniors!inner(first_name)
+    `)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  // 2) broadcast events: first notification.sent_at per request, plus count
+  const { data: notifs } = await supabase
+    .from("notifications")
+    .select("request_id, sent_at")
+    .order("sent_at", { ascending: false })
+    .limit(200);
+  const firstBroadcast = new Map<string, string>();
+  const countPerRequest = new Map<string, number>();
+  for (const n of (notifs ?? []).slice().reverse()) {
+    if (!firstBroadcast.has(n.request_id)) firstBroadcast.set(n.request_id, n.sent_at);
+    countPerRequest.set(n.request_id, (countPerRequest.get(n.request_id) ?? 0) + 1);
+  }
+
+  // 3) per-invite responses
+  const { data: tokens } = await supabase
+    .from("response_tokens")
+    .select(`
+      request_id, action, used_at,
+      volunteers:volunteers!inner(first_name, last_name),
+      service_requests:service_requests!inner(seniors:seniors!inner(first_name))
+    `)
+    .not("used_at", "is", null)
+    .order("used_at", { ascending: false })
+    .limit(50);
+
+  const events: DashboardActivityEvent[] = [];
+
+  for (const r of reqs ?? []) {
+    const senior = (r as unknown as { seniors: { first_name: string } }).seniors.first_name;
+    events.push({ at: r.created_at, kind: "created", text: `Request created for ${senior}`, requestId: r.id });
+    const bc = firstBroadcast.get(r.id);
+    if (bc) {
+      const n = countPerRequest.get(r.id) ?? 0;
+      events.push({ at: bc, kind: "broadcast", text: `Broadcast to ${n} volunteer${n === 1 ? "" : "s"} for ${senior}`, requestId: r.id });
+    }
+    if (r.cancelled_at) {
+      const reason = r.cancelled_reason ? ` (${r.cancelled_reason})` : "";
+      events.push({ at: r.cancelled_at, kind: "cancelled", text: `Request cancelled for ${senior}${reason}`, requestId: r.id });
+    }
+    if (r.reopened_at) events.push({ at: r.reopened_at, kind: "reopened", text: `Admin reopened request for ${senior}`, requestId: r.id });
+    if (r.completed_at) events.push({ at: r.completed_at, kind: "completed", text: `Request completed for ${senior}`, requestId: r.id });
+  }
+
+  for (const t of tokens ?? []) {
+    if (!t.used_at) continue;
+    const vol = (t as unknown as { volunteers: { first_name: string; last_name: string } }).volunteers;
+    const reqSen = (t as unknown as { service_requests: { seniors: { first_name: string } } }).service_requests.seniors;
+    const who = `${vol.first_name} ${vol.last_name}`;
+    if (t.action === "accept") {
+      events.push({ at: t.used_at, kind: "accepted", text: `${who} accepted ${reqSen.first_name}'s request`, requestId: t.request_id });
+    } else if (t.action === "decline") {
+      events.push({ at: t.used_at, kind: "declined", text: `${who} declined ${reqSen.first_name}'s request`, requestId: t.request_id });
+    }
+  }
+
+  events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  return events.slice(0, limit);
 }
