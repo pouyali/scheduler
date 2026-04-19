@@ -23,3 +23,15 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
 
   redirect("/signup/complete-profile");
 }
+
+export async function signupWithGoogleAction(): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  });
+  if (error) throw new Error(error.message);
+  if (data.url) redirect(data.url);
+}
