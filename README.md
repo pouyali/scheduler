@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Better At Home Scheduling
 
-## Getting Started
+Web platform for matching senior service requests with volunteers.
 
-First, run the development server:
+See [CLAUDE.md](./CLAUDE.md) and [docs/superpowers/specs/2026-04-18-phase-1-design.md](./docs/superpowers/specs/2026-04-18-phase-1-design.md) for the full design.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node 20+
+- Docker Desktop (for local Supabase)
+- Supabase CLI is installed as a dev dep; run via `npx supabase ...`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## First-time setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Copy `.env.example` to `.env.local`.
+2. Start local Supabase:
+   ```bash
+   npm run supabase:start
+   ```
+   Copy the printed `anon` and `service_role` keys into `.env.local`.
+3. Install deps:
+   ```bash
+   npm install
+   ```
+4. Generate types:
+   ```bash
+   npm run supabase:types
+   ```
+5. Seed a dev admin:
+   ```bash
+   npm run seed:admin
+   ```
+   Credentials: `admin@local.test` / `password123!`
+6. Run the app:
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+| Command                                       | Purpose                                         |
+| --------------------------------------------- | ----------------------------------------------- |
+| `npm run dev`                                 | Next dev server                                 |
+| `npm run build`                               | Production build                                |
+| `npm run lint`                                | ESLint                                          |
+| `npm run typecheck`                           | TypeScript                                      |
+| `npm run format`                              | Prettier write                                  |
+| `npm run test`                                | Vitest unit tests                               |
+| `npm run test:integration`                    | Vitest integration tests (needs local Supabase) |
+| `npm run test:e2e`                            | Playwright E2E                                  |
+| `npm run supabase:start` / `:stop` / `:reset` | Local Supabase                                  |
+| `npm run supabase:types`                      | Regenerate TS types from local DB               |
+| `npm run seed:admin`                          | Create dev admin user                           |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Directory guide
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/` — Next.js App Router. Grouped by `(public)`, `(admin)`, `(volunteer)`.
+- `lib/` — clients (Supabase), notifications, mapbox, auth, db query helpers.
+- `components/` — shared UI (shadcn primitives plus feature components).
+- `supabase/migrations/` — versioned SQL migrations.
+- `tests/integration/`, `tests/e2e/` — integration + E2E.
+- `docs/superpowers/` — specs and plans.
 
-## Deploy on Vercel
+## Production deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Covered in the Phase 1 design doc. Short version: Vercel + Supabase production project + verified Resend domain + Mapbox tokens restricted to the Vercel domain.
