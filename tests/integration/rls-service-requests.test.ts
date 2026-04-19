@@ -1,19 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/db/types";
-import { adminClient, createAdminUser, createVolunteerUser } from "./helpers";
-
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-async function authClientFor(email: string) {
-  const c = createClient<Database>(URL, ANON, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error } = await c.auth.signInWithPassword({ email, password: "password123!" });
-  if (error) throw error;
-  return c;
-}
+import { adminClient, createAdminUser, createVolunteerUser, signIn } from "./helpers";
 
 describe("RLS — service_requests and notifications", () => {
   test("volunteer cannot read a request they were not notified about", async () => {
@@ -38,7 +24,7 @@ describe("RLS — service_requests and notifications", () => {
       request_id: req!.id, volunteer_id: vA.userId, channel: "email", status: "sent", event_type: "invite",
     });
 
-    const clientB = await authClientFor(vB.email);
+    const clientB = await signIn(vB.email);
     const { data: visible } = await clientB.from("service_requests").select("id").eq("id", req!.id);
     expect(visible ?? []).toEqual([]);
   });
@@ -63,7 +49,7 @@ describe("RLS — service_requests and notifications", () => {
       request_id: req!.id, volunteer_id: vA.userId, channel: "email", status: "sent", event_type: "invite",
     });
 
-    const clientA = await authClientFor(vA.email);
+    const clientA = await signIn(vA.email);
     const { data } = await clientA.from("service_requests").select("id").eq("id", req!.id);
     expect(data?.length).toBe(1);
   });
@@ -78,7 +64,7 @@ describe("RLS — service_requests and notifications", () => {
       province: "ON", postal_code: "M1A1A1", created_by: a.userId,
     });
 
-    const c = await authClientFor(v.email);
+    const c = await signIn(v.email);
     const { data } = await c.from("seniors").select("id");
     expect(data ?? []).toEqual([]);
   });
@@ -87,7 +73,7 @@ describe("RLS — service_requests and notifications", () => {
     const admin = adminClient();
     const ts = Date.now();
     const v = await createVolunteerUser(`v-tok-${ts}@t.local`, "active");
-    const c = await authClientFor(v.email);
+    const c = await signIn(v.email);
     const { data } = await c.from("response_tokens").select("id");
     expect(data ?? []).toEqual([]);
   });
