@@ -100,7 +100,7 @@ export async function _sendInvitesForAdmin(
   const alreadyLive = new Set((existingToks ?? []).map(t => t.volunteer_id));
   const toSend = (vols ?? []).filter(v => !alreadyLive.has(v.id));
 
-  const expires = computeTokenExpiry(req.requested_date).toISOString();
+  const expires = computeTokenExpiry(req.requested_at).toISOString();
 
   let sent = 0, failed = 0;
   for (const v of toSend) {
@@ -122,7 +122,7 @@ export async function _sendInvitesForAdmin(
       seniorFirstName: senior!.first_name,
       seniorCity: senior!.city,
       category: req.category,
-      requestedDate: req.requested_date,
+      requestedDate: req.requested_at,
       descriptionExcerpt: (req.description ?? "").slice(0, 240),
       acceptUrl: `${opts.appUrl}/respond/${token}?action=accept`,
       declineUrl: `${opts.appUrl}/respond/${token}?action=decline`,
@@ -172,7 +172,7 @@ export async function cancelRequestAction(input: { id: string; reason?: string; 
         to: vol.email,
         volunteerFirstName: vol.first_name,
         category: req.category,
-        requestedDate: req.requested_date,
+        requestedDate: req.requested_at,
         reason: input.reason,
         dashboardUrl,
       });
@@ -222,7 +222,7 @@ export async function reassignRequestAction(input: { id: string; newVolunteerId:
   const { data: vol } = await supabase.from("volunteers").select("id, first_name, email").eq("id", input.newVolunteerId).single();
   if (!vol) throw new Error(`Volunteer ${input.newVolunteerId} not found`);
 
-  const expires = computeTokenExpiry(req.requested_date).toISOString();
+  const expires = computeTokenExpiry(req.requested_at).toISOString();
   const token = newToken();
   await supabase.from("response_tokens").insert({
     token, request_id: req.id, volunteer_id: vol.id, expires_at: expires,
@@ -238,7 +238,7 @@ export async function reassignRequestAction(input: { id: string; newVolunteerId:
     seniorFirstName: senior.first_name,
     seniorCity: senior.city,
     category: req.category,
-    requestedDate: req.requested_date,
+    requestedDate: req.requested_at,
     descriptionExcerpt: (req.description ?? "").slice(0, 240),
     acceptUrl: `${appUrl}/respond/${token}?action=accept`,
     declineUrl: `${appUrl}/respond/${token}?action=decline`,
@@ -290,7 +290,7 @@ export async function retryNotificationAction(notificationId: string) {
     seniorFirstName: senior!.first_name,
     seniorCity: senior!.city,
     category: req!.category,
-    requestedDate: req!.requested_date,
+    requestedDate: req!.requested_at,
     descriptionExcerpt: (req!.description ?? "").slice(0, 240),
     acceptUrl: `${appUrl}/respond/${tok.token}?action=accept`,
     declineUrl: `${appUrl}/respond/${tok.token}?action=decline`,

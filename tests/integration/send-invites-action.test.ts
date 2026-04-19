@@ -26,7 +26,7 @@ async function seed() {
   }).select().single();
   const { data: r } = await admin.from("service_requests").insert({
     senior_id: s!.id, category: "transportation", priority: "normal",
-    requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "open",
+    requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "open",
   }).select().single();
   return { admin, request: r!, v1, v2 };
 }

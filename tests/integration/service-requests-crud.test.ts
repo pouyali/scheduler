@@ -31,7 +31,7 @@ describe("service_requests queries", () => {
       senior_id: senior.id,
       category: "transportation",
       priority: "normal",
-      requested_date: "2030-01-15",
+      requested_at: "2030-01-15T17:00:00.000Z",
       description: "ride to appt",
       created_by: adminId,
     });
@@ -48,7 +48,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
     // Simulate notified state via direct write.
     await admin.from("service_requests").update({ status: "notified" }).eq("id", created.id);
@@ -70,7 +70,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
     // Fake a notified state + outstanding token.
     await admin.from("service_requests").update({ status: "notified" }).eq("id", created.id);
@@ -99,7 +99,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
 
     // Put into accepted state directly via admin client (bypassing RPC for this specific test setup).
@@ -127,7 +127,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
     const counts = await countRequestsByStatus(admin);
     expect(counts.open).toBeGreaterThan(0);
@@ -137,7 +137,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
     await admin.from("service_requests").update({ status: "notified" }).eq("id", created.id);
 
@@ -165,7 +165,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
 
     const { createVolunteerUser } = await import("./helpers");
@@ -196,7 +196,7 @@ describe("service_requests queries", () => {
     const { admin, senior, adminId } = await seedSenior();
     const created = await createServiceRequest(admin, {
       senior_id: senior.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-15", description: "x", created_by: adminId,
+      requested_at: "2030-01-15T17:00:00.000Z", description: "x", created_by: adminId,
     });
     await admin.from("service_requests").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", created.id);
     await expect(

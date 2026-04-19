@@ -12,7 +12,7 @@ const Schema = z.object({
   senior_id: z.string().uuid({ message: "Please pick a senior." }),
   category: z.string().min(1, "Category is required."),
   priority: z.enum(["low", "normal", "high"]),
-  requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a valid date."),
+  requested_at: z.string().min(1, "Pick a valid date."),
   description: z.string().max(2000).optional().default(""),
 });
 
@@ -66,7 +66,7 @@ export async function _createRequestForAdmin(
     senior_id: input.senior_id,
     category: input.category,
     priority: input.priority,
-    requested_date: input.requested_date,
+    requested_at: input.requested_at,
     description: input.description || null,
     created_by: adminId,
   });

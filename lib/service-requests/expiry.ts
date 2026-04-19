@@ -1,13 +1,28 @@
 const TZ = "America/Toronto";
 
 export function computeTokenExpiry(
-  requestedDate: string,
+  requestedAt: string,
   now: Date = new Date(),
 ): Date {
-  // Build 23:59:59.999 on requested_date in America/Toronto, as a UTC Date.
-  const endOfDayInTz = zonedEndOfDay(requestedDate, TZ);
+  // requestedAt may be a full ISO timestamp (e.g. "2030-01-15T17:00:00.000Z")
+  // or a legacy date-only string ("2030-01-15"). Extract the local date in
+  // America/Toronto so the expiry is end-of-that-calendar-day in Toronto.
+  const localDate = isoToLocalDate(requestedAt, TZ);
+  const endOfDayInTz = zonedEndOfDay(localDate, TZ);
   const floor = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   return endOfDayInTz.getTime() > floor.getTime() ? endOfDayInTz : floor;
+}
+
+/** Convert an ISO string (timestamp or date-only) to a YYYY-MM-DD string in tz. */
+function isoToLocalDate(iso: string, tz: string): string {
+  const date = new Date(iso);
+  const dtf = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return dtf.format(date); // en-CA gives YYYY-MM-DD
 }
 
 function zonedEndOfDay(dateIso: string, tz: string): Date {

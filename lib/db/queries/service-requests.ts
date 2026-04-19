@@ -11,7 +11,7 @@ export type ListFilters = {
   q?: string;
   dateFrom?: string;
   dateTo?: string;
-  cursor?: { requested_date: string; id: string } | null;
+  cursor?: { requested_at: string; id: string } | null;
   limit?: number;
 };
 
@@ -25,7 +25,7 @@ export async function getServiceRequestById(supabase: Client, id: string): Promi
 export async function listServiceRequests(
   supabase: Client,
   filters: ListFilters = {},
-): Promise<{ rows: Row[]; nextCursor: { requested_date: string; id: string } | null }> {
+): Promise<{ rows: Row[]; nextCursor: { requested_at: string; id: string } | null }> {
   const limit = filters.limit ?? 50;
 
   // Base select. When `q` is provided, inner-join seniors so we can filter by name.
@@ -36,8 +36,8 @@ export async function listServiceRequests(
   let q = supabase.from("service_requests").select(selectStr);
 
   if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
-  if (filters.dateFrom) q = q.gte("requested_date", filters.dateFrom);
-  if (filters.dateTo) q = q.lte("requested_date", filters.dateTo);
+  if (filters.dateFrom) q = q.gte("requested_at", filters.dateFrom);
+  if (filters.dateTo) q = q.lte("requested_at", filters.dateTo);
 
   if (filters.q?.trim()) {
     const escaped = filters.q.trim().replace(/[%_]/g, "").replace(/"/g, '""');
@@ -46,13 +46,13 @@ export async function listServiceRequests(
   }
 
   if (filters.cursor) {
-    const d = filters.cursor.requested_date;
+    const d = filters.cursor.requested_at;
     const id = filters.cursor.id;
-    q = q.or(`requested_date.lt.${d},and(requested_date.eq.${d},id.gt.${id})`);
+    q = q.or(`requested_at.lt.${d},and(requested_at.eq.${d},id.gt.${id})`);
   }
 
   q = q
-    .order("requested_date", { ascending: false })
+    .order("requested_at", { ascending: false })
     .order("id", { ascending: true })
     .limit(limit + 1);
 
@@ -68,7 +68,7 @@ export async function listServiceRequests(
   const rows = hasMore ? rowsData.slice(0, limit) : rowsData;
   const last = rows[rows.length - 1];
   const nextCursor =
-    hasMore && last ? { requested_date: last.requested_date, id: last.id } : null;
+    hasMore && last ? { requested_at: last.requested_at, id: last.id } : null;
   return { rows, nextCursor };
 }
 
@@ -76,7 +76,7 @@ export type CreateInput = {
   senior_id: string;
   category: string;
   priority: Priority;
-  requested_date: string;
+  requested_at: string;
   description: string | null;
   created_by: string;
 };
@@ -92,14 +92,14 @@ export async function createServiceRequest(supabase: Client, input: CreateInput)
 }
 
 const LOCKED_WHEN_NOTIFIED: readonly (keyof UpdateInput)[] = [
-  "senior_id", "category", "requested_date",
+  "senior_id", "category", "requested_at",
 ];
 
 export type UpdateInput = Partial<{
   senior_id: string;
   category: string;
   priority: Priority;
-  requested_date: string;
+  requested_at: string;
   description: string | null;
 }>;
 

@@ -13,7 +13,7 @@ async function seed() {
   }).select().single();
   const { data: r } = await admin.from("service_requests").insert({
     senior_id: s!.id, category: "transportation", priority: "normal",
-    requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "notified",
+    requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "notified",
   }).select().single();
   const token = `tok-${ts}-${Math.random()}`;
   await admin.from("response_tokens").insert({
@@ -64,7 +64,7 @@ describe("respondFromPortal", () => {
     }).select().single();
     const { data: r } = await admin.from("service_requests").insert({
       senior_id: s!.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "notified",
+      requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "notified",
     }).select().single();
     // No token created for this volunteer.
     const outcome = await _respondFromPortal({ requestId: r!.id, volunteerId: v.userId, action: "accept" });

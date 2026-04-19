@@ -13,7 +13,7 @@ async function seedTokenFor(action: "accept" | "decline", status: "notified" | "
   }).select().single();
   const { data: r } = await admin.from("service_requests").insert({
     senior_id: s!.id, category: "transportation", priority: "normal",
-    requested_date: "2030-01-01", description: "x", created_by: a.userId, status,
+    requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status,
     // The "accepted" constraint requires an assignee when status = "accepted".
     ...(status === "accepted" ? { assigned_volunteer_id: v.userId } : {}),
   }).select().single();

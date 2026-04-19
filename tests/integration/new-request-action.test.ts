@@ -8,7 +8,7 @@ describe("createRequestAction", () => {
       senior_id: "",
       category: "",
       priority: "normal",
-      requested_date: "",
+      requested_at: "",
       description: "",
     } as never);
     expect(result.ok).toBe(false);
@@ -28,7 +28,7 @@ describe("createRequestAction", () => {
     const { _createRequestForAdmin } = await import("@/app/(admin)/admin/requests/new/actions");
     const req = await _createRequestForAdmin(admin, {
       senior_id: s!.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-01", description: "x",
+      requested_at: "2030-01-01T17:00:00.000Z", description: "x",
     }, a.userId);
     expect(req.status).toBe("open");
   });

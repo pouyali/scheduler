@@ -16,7 +16,7 @@ describe("RLS — service_requests and notifications", () => {
 
     const { data: req } = await admin.from("service_requests").insert({
       senior_id: senior!.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "notified",
+      requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "notified",
     }).select().single();
 
     // Notify only vA.
@@ -42,7 +42,7 @@ describe("RLS — service_requests and notifications", () => {
 
     const { data: req } = await admin.from("service_requests").insert({
       senior_id: senior!.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "notified",
+      requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "notified",
     }).select().single();
 
     await admin.from("notifications").insert({
@@ -82,7 +82,7 @@ describe("RLS — service_requests and notifications", () => {
     }).select().single();
     const { data: req } = await admin.from("service_requests").insert({
       senior_id: senior!.id, category: "transportation", priority: "normal",
-      requested_date: "2030-01-01", description: "x", created_by: a.userId, status: "notified",
+      requested_at: "2030-01-01T17:00:00.000Z", description: "x", created_by: a.userId, status: "notified",
     }).select().single();
     // Token for vA.
     await admin.from("response_tokens").insert({
