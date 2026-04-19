@@ -131,12 +131,13 @@ export async function updateServiceRequest(
 export async function cancelServiceRequest(
   supabase: Client, id: string, opts: { reason?: string | null },
 ): Promise<Row> {
-  // The generated type emits p_reason as `string` because the Supabase TS generator
-  // doesn't model nullable text args; the Postgres function accepts NULL fine at runtime.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- nullable text param, safe at runtime
+  // Supabase's TS generator emits `p_reason: string` for the nullable Postgres
+  // `text` arg. `cancelled_reason` is nullable in the table, and the RPC stores
+  // whatever is passed — NULL included — directly. Cast via `unknown` to allow
+  // null at the call site without reaching for `any`.
   const { error: rpcErr } = await supabase.rpc("cancel_service_request", {
     p_id: id,
-    p_reason: (opts.reason ?? null) as any,
+    p_reason: (opts.reason ?? null) as unknown as string,
   });
   if (rpcErr) throw rpcErr;
 
