@@ -244,7 +244,7 @@ export type Database = {
           id: string
           priority: Database["public"]["Enums"]["request_priority"]
           reopened_at: string | null
-          requested_date: string
+          requested_at: string
           senior_id: string
           status: Database["public"]["Enums"]["request_status"]
           updated_at: string
@@ -261,7 +261,7 @@ export type Database = {
           id?: string
           priority?: Database["public"]["Enums"]["request_priority"]
           reopened_at?: string | null
-          requested_date: string
+          requested_at: string
           senior_id: string
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
@@ -278,7 +278,7 @@ export type Database = {
           id?: string
           priority?: Database["public"]["Enums"]["request_priority"]
           reopened_at?: string | null
-          requested_date?: string
+          requested_at?: string
           senior_id?: string
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
