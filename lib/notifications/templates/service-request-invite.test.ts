@@ -7,7 +7,7 @@ const baseInput = {
   seniorFirstName: "Jane",
   seniorCity: "Toronto",
   category: "transportation",
-  requestedDate: "2026-05-20",
+  requestedAt: "2026-05-20T17:00:00.000Z",
   descriptionExcerpt: "Ride to a medical appointment downtown.",
   acceptUrl: "https://example.test/respond/tok123?action=accept",
   declineUrl: "https://example.test/respond/tok123?action=decline",

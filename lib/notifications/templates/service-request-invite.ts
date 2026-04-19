@@ -6,17 +6,22 @@ export type ServiceRequestInviteInput = {
   seniorFirstName: string;
   seniorCity: string;
   category: string;
-  requestedDate: string; // ISO date (YYYY-MM-DD)
+  requestedAt: string; // ISO timestamp
   descriptionExcerpt: string;
   acceptUrl: string;
   declineUrl: string;
 };
 
 export function renderServiceRequestInvite(input: ServiceRequestInviteInput): Email {
-  const prettyDate = new Date(`${input.requestedDate}T12:00:00-04:00`).toLocaleDateString(
-    "en-CA",
-    { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "America/Toronto" },
-  );
+  const prettyDate = new Date(input.requestedAt).toLocaleString("en-CA", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Toronto",
+  });
 
   const subject = `You've been invited to help with a ${input.category} request`;
 
