@@ -34,7 +34,7 @@ export default async function SeniorsListPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Seniors</h2>
+        <h2 className="text-h2">Seniors</h2>
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link href="/admin/seniors/import">Import CSV</Link>
@@ -51,14 +51,14 @@ export default async function SeniorsListPage({
           name="q"
           defaultValue={sp.q ?? ""}
           placeholder="Search name, phone, address"
-          className="h-9 flex-1 rounded-md border px-2 text-sm"
+          className="h-9 flex-1 rounded-[var(--radius)] border px-2 text-sm"
         />
         <input
           type="text"
           name="city"
           defaultValue={sp.city ?? ""}
           placeholder="City"
-          className="h-9 w-40 rounded-md border px-2 text-sm"
+          className="h-9 w-40 rounded-[var(--radius)] border px-2 text-sm"
         />
         <label className="flex items-center gap-1 text-sm">
           <input type="checkbox" name="archived" value="true" defaultChecked={sp.archived === "true"} />
@@ -80,7 +80,7 @@ export default async function SeniorsListPage({
 
       <table className="w-full border-collapse text-sm">
         <thead className="text-left text-xs uppercase text-muted-foreground">
-          <tr>
+          <tr className="border-b border-border">
             <th className="py-2">Name</th>
             <th>Phone</th>
             <th>City</th>
@@ -100,7 +100,7 @@ export default async function SeniorsListPage({
             rows.map((r) => {
               const c = counts.get(r.id);
               return (
-                <tr key={r.id} className="border-t">
+                <tr key={r.id} className="border-t hover:bg-muted">
                   <td className="py-2">
                     <Link href={`/admin/seniors/${r.id}`} className="underline">
                       {r.first_name} {r.last_name}

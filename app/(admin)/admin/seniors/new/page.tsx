@@ -10,7 +10,7 @@ export default async function NewSeniorPage() {
         <Link href="/admin/seniors" className="text-sm underline">
           ← Back to seniors
         </Link>
-        <h2 className="mt-2 text-xl font-semibold">New senior</h2>
+        <h2 className="mt-2 text-h2">New senior</h2>
       </div>
       <SeniorForm />
     </div>

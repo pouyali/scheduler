@@ -116,14 +116,14 @@ export function SeniorEdit({ senior }: { senior: Senior }) {
       <div className="grid gap-2">
         <Label>Location</Label>
         {pins.length > 0 ? null : (
-          <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <p className="rounded-[var(--radius)] border border-border bg-muted px-3 py-2 text-xs text-muted-foreground italic">
             Not geocoded. Enter coordinates manually or use &ldquo;Drop pin at map center&rdquo; below.
           </p>
         )}
         <MapView
           pins={pins}
           draggable
-          className="h-80 w-full rounded-md border"
+          className="h-80 w-full rounded-[var(--radius-lg)] border"
           initialCenter={lat != null && lng != null ? [lng, lat] : undefined}
           initialZoom={lat != null && lng != null ? 14 : 10}
           onPinDrag={(newLat, newLng) => {
@@ -161,7 +161,7 @@ export function SeniorEdit({ senior }: { senior: Senior }) {
       </div>
 
       <div className="col-span-full flex items-center justify-end gap-2 border-t pt-4">
-        {error ? <p className="mr-auto text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="mr-auto text-sm text-muted-foreground italic">{error}</p> : null}
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving…" : "Save changes"}
         </Button>
