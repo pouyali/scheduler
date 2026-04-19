@@ -1,7 +1,0 @@
-first_name,last_name,phone,email,address_line1,address_line2,city,province,postal_code,notes
-Good,One,6045550140,,1245 Robson St,,Vancouver,BC,V6E 1B9,
-Good,Two,6045550141,,900 W Georgia St,,Vancouver,BC,V6C 2W6,
-Good,Three,6045550142,,800 Hornby St,,Vancouver,BC,V6Z 2C5,
-Good,Four,6045550143,,1 Unreachable Rd,,Vancouver,BC,V6E 1B9,
-,NoFirst,6045550144,,1 Main St,,Vancouver,BC,V6E 1B9,
-Bad,Phone,123,,1 Main St,,Vancouver,BC,V6E 1B9,

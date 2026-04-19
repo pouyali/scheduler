@@ -32,7 +32,6 @@ Mapbox (tiles + geocoding)
 ```
 
 Phase 2 is explicitly out of scope for implementation but accounted for in schema:
-
 - SMS + mobile push (slots in `NotificationService` interface)
 - Mobile app with session tracking (`service_sessions` table exists, no UI)
 - Availability calendar, AI matching, multilingual
@@ -42,17 +41,13 @@ Phase 2 is explicitly out of scope for implementation but accounted for in schem
 All timestamps `timestamptz`, default `now()`. All IDs `uuid`, default `gen_random_uuid()`. RLS enabled on every table.
 
 ### `admins`
-
 One-to-one with `auth.users`.
-
 - `id` (uuid, PK, FK → `auth.users.id`)
 - `first_name`, `last_name`, `phone`
 - `created_at`
 
 ### `volunteers`
-
 One-to-one with `auth.users`.
-
 - `id` (uuid, PK, FK → `auth.users.id`)
 - `first_name`, `last_name`, `phone`, `email`
 - `status` enum: `pending` | `active` | `inactive` (default `pending`)
@@ -64,9 +59,7 @@ One-to-one with `auth.users`.
 - `created_at`, `approved_at` (nullable), `approved_by` (admin id, nullable)
 
 ### `seniors`
-
 No auth link. Admin-managed.
-
 - `id` (uuid, PK)
 - `first_name`, `last_name`, `phone`, `email` (nullable)
 - `address_line1`, `address_line2`, `city`, `province`, `postal_code`
@@ -75,7 +68,6 @@ No auth link. Admin-managed.
 - `created_at`, `created_by` (admin id)
 
 ### `service_requests`
-
 - `id` (uuid, PK)
 - `senior_id` (FK → `seniors`)
 - `category` text, `priority` enum: `low` | `normal` | `high`
@@ -87,27 +79,21 @@ No auth link. Admin-managed.
 - `completed_at` (nullable)
 
 ### `notifications`
-
 Audit trail of every send.
-
 - `id`, `request_id` (FK), `volunteer_id` (FK)
 - `channel` enum: `email` (future: `sms`, `push`)
 - `sent_at`, `delivered_at` (nullable)
 - `status` enum: `sent` | `failed` | `bounced`
 
 ### `response_tokens`
-
 Single-use magic-link tokens.
-
 - `id`, `token` text (random, unique index)
 - `request_id` (FK), `volunteer_id` (FK)
 - `expires_at`
 - `used_at` (nullable), `action` enum: `accept` | `decline` | `superseded` (nullable until used)
 
 ### `service_sessions` (Phase 2 placeholder)
-
 Schema present, no UI in Phase 1.
-
 - `id`, `request_id` (FK), `volunteer_id` (FK)
 - `started_at`, `ended_at` (nullable)
 - `start_lat`, `start_lng`, `end_lat`, `end_lng`
@@ -144,7 +130,6 @@ Schema present, no UI in Phase 1.
 ## Key flows
 
 ### 1. New service request
-
 1. Admin opens `/admin/requests/new`. Searches/selects senior (can create inline).
 2. Fills category, priority, requested date, description. Saves → request `status='open'`.
 3. Request detail page shows eligible volunteers (active + matching category + service area).
@@ -153,7 +138,6 @@ Schema present, no UI in Phase 1.
 6. Request `status='notified'`.
 
 ### 2. Volunteer responds via magic link
-
 1. Volunteer clicks Accept or Decline in email → `/respond/[token]`.
 2. Route handler (service-role client):
    - Look up token. Reject if missing, expired, or already used.
@@ -164,7 +148,6 @@ Schema present, no UI in Phase 1.
 3. Render confirmation page with request details + portal login link.
 
 ### 3. Volunteer signup and approval
-
 1. `/signup` → email/password or Google OAuth.
 2. First login without a `volunteers` row → redirect to `/signup/complete-profile` (phone, categories, service area, optional home address).
 3. `volunteers` row inserted, `status='pending'`.
@@ -172,7 +155,6 @@ Schema present, no UI in Phase 1.
 5. Admin at `/admin/volunteers?status=pending` approves or rejects. Approval sends a "you're approved" email and sets `status='active'`. Rejection sets `status='inactive'`.
 
 ### 4. Senior CSV import
-
 1. Admin at `/admin/seniors/import` downloads a CSV template (headers + one example row).
 2. Uploads filled CSV. Server route handler parses and validates each row (required fields, phone format, postal code).
 3. For valid rows, calls Mapbox Geocoding API (secret token, server-side) to set `lat`/`lng`.
@@ -180,17 +162,14 @@ Schema present, no UI in Phase 1.
 5. Admin confirms → bulk insert. Error rows downloadable as a CSV error report.
 
 ### 5. Request completion (Phase 1)
-
 Admin marks `completed` manually from the request detail page. Phase 2 mobile app lights up volunteer-initiated completion via `service_sessions`.
 
 ### 6. Broadcast race condition
-
 First-to-accept wins. The `service_requests.status → accepted` trigger supersedes all other open tokens for that request. Late clickers see "already filled, thanks anyway" — not an error.
 
 ## UI surface
 
 ### Admin (`/admin/*`, role-gated)
-
 - `/admin` — dashboard: counts (open requests, pending volunteers, active seniors), recent activity, upcoming requests
 - `/admin/analytics` — charts (requests by week/month/category), heatmap over senior + request locations, active counts
 - `/admin/calendar` — month/week/day views of requests, filter by status/category
@@ -200,17 +179,14 @@ First-to-accept wins. The `service_requests.status → accepted` trigger superse
 - `/admin/volunteers` — list + status tabs; `/new`, `/[id]`
 
 ### Volunteer (`/volunteer/*`, auth'd, status='active')
-
 - `/volunteer/dashboard` — pending invites + accepted upcoming
 - `/volunteer/history` — past accepted/completed
 - `/volunteer/profile` — edit own profile (not status)
 
 ### Public
-
 - `/signup`, `/signup/complete-profile`, `/login`, `/respond/[token]`
 
 ### Shared components
-
 - `MapView` (wraps Mapbox GL JS)
 - `CalendarView` (wraps react-big-calendar)
 - `DataTable` (sortable/filterable)
@@ -342,7 +318,6 @@ Accounts the user must create before implementation can complete:
 6. **Domain name** (optional for Phase 1 dev; needed for production email + polished OAuth consent).
 
 Work possible without any of the above:
-
 - Project scaffolding, deps, Tailwind + shadcn setup
 - Migrations as SQL files (applied later)
 - All logic + tests with mock data
